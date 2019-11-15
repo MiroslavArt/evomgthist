@@ -1,0 +1,102 @@
+.ev-i-rdm .main-grid-header {
+    display: none;
+}
+/*.ev-i-rdm .main-grid-header th {
+    height: 0px!important;
+    min-height: 0px!important;
+}*/
+
+.ev-i-rdm__stage-title {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ev-i-rdm__stage-title_subtitle {
+    text-align: center;
+}
+
+/*.ev-i-rdm__table-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ev-i-rdm__table-block-left,
+.ev-i-rdm__table-block-right {
+    width: 100px;
+}*/
+
+.ev-i-rdm .main-grid-cell {
+    background: none;
+    border-bottom: none;
+}
+.ev-i-rdm .main-grid-row:hover .main-grid-cell {
+    background-color: transparent!important;
+}
+
+.ev-i-rdm__stage-incoming,
+.ev-i-rdm__stage-lose {
+    text-align: center;
+}
+.ev-i-rdm__stage-wrapper {
+    padding: 25px 15px;
+    min-width: 220px;
+    border-radius: 5px;
+    height: 100%;
+}
+.ev-i-rdm__all-new {
+    width: 70px;
+    padding: 20px 15px 15px;
+    margin: 0px auto;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    height: 35px;
+}
+.ev-i-rdm__stage-incoming {
+    min-width: 220px;
+    padding: 20px 15px 15px;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 5px;
+    background-color: #fff;
+    height: 35px;
+}
+.ev-i-rdm__all-success {
+    min-width: 150px;
+    padding: 15px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    background-color: #04b578;
+    color: #fff;
+    text-align: center;
+    height: 40px;
+}
+.ev-i-rdm__all-success-count {
+    font-size: 18px;
+    font-weight: 700;
+}
+.ev-i-rdm__all-success-sum {
+    font-size: 14px;
+}
+.ev-i-rdm__all-lose-title {
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 15px;
+}
+.ev-i-rdm__stage-lose {
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 15px;
+}
+.ev-i-rdm__all-failure {
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 15px;
+    color: #fff;
+    background: #ba687f;
+    border-radius: 5px;
+}
