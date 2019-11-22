@@ -7,6 +7,8 @@ bitrix/*
 !bitrix/php_interface/
 !bitrix/admin/
 !bitrix/tools/
+!bitrix/composer-bx.json
+!bitrix/composer-bx.lock
 
 
 # игнорируем все модули

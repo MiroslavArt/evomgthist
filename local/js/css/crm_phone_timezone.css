@@ -1,0 +1,11 @@
+.itrack-custom-crm-phonetime__phone-block {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+.itrack-custom-crm-phonetime__phone-block_text {
+    font-weight: 600;
+}
+.crm-entity-widget-content-block-mutlifield .itrack-custom-crm-phonetime__phone-block {
+    right: 100px;
+}
