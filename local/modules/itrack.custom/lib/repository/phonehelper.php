@@ -27,7 +27,7 @@ class PhoneHelper
     {
         $nationalNumber = $this->parsedPhone->getNationalNumber();
         $firstDigit = substr($nationalNumber, 0, 1);
-        if((int)$firstDigit === 9) {
+        if((int)$firstDigit === 9 && $this->parsedPhone->getCountryCode() == 7) {
             $operatorCode = (int)substr($nationalNumber, 0, 3);
             $number = (int)str_replace($operatorCode, '', $nationalNumber);
             $obQuery = new Query(MobilePhoneTimezoneTable::getEntity());

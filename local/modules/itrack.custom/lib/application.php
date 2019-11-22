@@ -21,6 +21,7 @@ class Application
             'company_detail' => ltrim(Option::get('crm', 'path_to_company_details', '', SITE_ID), '/'),
             'lead_kanban' => ltrim(Option::get('crm', 'path_to_lead_kanban', '', SITE_ID), '/'),
             'deal_kanban' => ltrim(Option::get('crm', 'path_to_deal_kanban', '', SITE_ID), '/'),
+            'deal_kanban_category' => ltrim(Option::get('crm', 'path_to_deal_kanban', '', SITE_ID), '/').'category/#category_id#/',
             'contact_list' => ltrim(Option::get('crm', 'path_to_contact_list', '', SITE_ID), '/'),
             'company_list' => ltrim(Option::get('crm', 'path_to_company_list', '', SITE_ID), '/'),
         ];
@@ -37,6 +38,7 @@ class Application
                     break;
                 case 'lead_kanban':
                 case 'deal_kanban':
+                case 'deal_kanban_category':
                     $type = 'kanban';
                     break;
                 case 'contact_list':

@@ -10,7 +10,8 @@ class Phone extends Controller
     public function configureActions()
     {
         return [
-            'getTimezone' => []
+            'getTimezone' => [],
+            'getTimezoneCollection' => []
         ];
     }
 
@@ -18,5 +19,20 @@ class Phone extends Controller
     {
         $phoneHelper = new PhoneHelper($phone);
         return $phoneHelper->getTimezone();
+    }
+
+    public function getTimezoneCollectionAction($phones)
+    {
+        $result = [];
+        if(!empty($phones)) {
+            foreach($phones as $phone) {
+                $phoneHelper = new PhoneHelper($phone);
+                $result[] = [
+                    'phone' => $phone,
+                    'timezone' => $phoneHelper->getTimezone()
+                ];
+            }
+        }
+        return $result;
     }
 }

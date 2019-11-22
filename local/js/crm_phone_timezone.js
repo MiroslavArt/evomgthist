@@ -2,34 +2,67 @@
 BX.namespace('iTrack.Crm.PhoneTimezone');
 
 BX.iTrack.Crm.PhoneTimezone = {
+    kanban: null,
     init: function(type) {
         switch(type) {
             case 'detail':
                 BX.addCustomEvent('BX.Crm.EntityEditor:onInit', BX.delegate(this.detailHandler, this));
                 BX.addCustomEvent('BX.Crm.EntityEditorSection:onLayout', BX.delegate(this.detailHandler, this));
                 break;
-            case 'canban':
+            case 'kanban':
                 BX.addCustomEvent('Kanban.Grid:onRender', BX.delegate(this.kanbanHandler, this));
                 break;
         }
     },
     detailHandler: function(editor, data) {
-        /*var container = document.querySelector('.crm-entity-widget-content-block[data-cid="CONTACT"]');
-        if(container) {*/
-            document.querySelectorAll('.crm-entity-widget-client-contact-phone').forEach(function (el) {
-                this.processPhone(el);
-            }.bind(this));
-        //}
+        document.querySelectorAll('.crm-entity-widget-client-contact-phone').forEach(function (el) {
+            this.processPhone(el);
+        }.bind(this));
         document.querySelectorAll('.crm-entity-phone-number').forEach(function (el) {
             this.processPhone(el);
         }.bind(this));
-        /*data.model._data
-        console.log('detail handler');
-        console.log(event);*/
     },
     kanbanHandler: function(grid){
-        //grid.items[i].data.phone[0].value
-        //grid.items[i].contactBlock
+        this.kanban = grid;
+        var collectPhones = [];
+        for(var i in grid.items) {
+            if(grid.items[i].data.hasOwnProperty('phone')) {
+                if (grid.items[i].data.phone.length) {
+                    var localValue = localStorage.getItem(grid.items[i].data.phone[0].value);
+                    if (localValue == null) {
+                        collectPhones.push(grid.items[i].data.phone[0].value);
+                    }
+                }
+            }
+        }
+        if(collectPhones.length) {
+            this.requestTimezoneCollection(collectPhones).then(function(response) {
+                console.log(response);
+                this.processCollectionResponse(response);
+                this.processKanbanPhones();
+            }.bind(this), function(error){
+                console.log(error);
+            }.bind(this));
+        } else {
+            this.processKanbanPhones();
+        }
+    },
+    processKanbanPhones: function() {
+        var items = this.kanban.items;
+        for(var i in items) {
+            if(items[i].data.hasOwnProperty('phone')) {
+                if (items[i].data.phone.length) {
+                    var localValue = localStorage.getItem(items[i].data.phone[0].value);
+                    if (localValue !== null) {
+                        if (!items[i].contactBlock.querySelector('.itrack-custom-crm-phonetime__phone-block')) {
+                            var timeNode = this.createTimeNodeForContactBlock();
+                            BX.append(timeNode, items[i].contactBlock);
+                            new BX.iTrack.Crm.PhoneTimezone.Timer(localValue, timeNode);
+                        }
+                    }
+                }
+            }
+        }
     },
     processPhone: function(phoneNode) {
         phoneNode = phoneNode || null;
@@ -78,6 +111,25 @@ BX.iTrack.Crm.PhoneTimezone = {
             }
         }
         return timezone;
+    },
+    requestTimezoneCollection: function (phones) {
+        return BX.ajax.runAction('itrack:custom.api.phone.getTimezoneCollection', {
+            data: {
+                phones: phones
+            }
+        });
+    },
+    processCollectionResponse: function(response) {
+        console.log(response);
+        if(response.hasOwnProperty('status')) {
+            if(response.status == 'success') {
+                if(response.data.length) {
+                    for(var i in response.data) {
+                        localStorage.setItem(response.data[i].phone, response.data[i].timezone);
+                    }
+                }
+            }
+        }
     }
 };
 

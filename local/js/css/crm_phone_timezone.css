@@ -9,3 +9,11 @@
 .crm-entity-widget-content-block-mutlifield .itrack-custom-crm-phonetime__phone-block {
     right: 100px;
 }
+.crm-kanban-item-connect .itrack-custom-crm-phonetime__phone-block {
+    top: 2px;
+    right: 30px;
+}
+.crm-kanban-item-connect .itrack-custom-crm-phonetime__phone-block_text {
+    font-weight: 400;
+    font-size: 12px;
+}

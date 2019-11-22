@@ -56,16 +56,17 @@ class itrack_custom extends \CModule
                 while($data = fgetcsv($phoneDataHandler, 2000, ',')) {
                     $sql = 'INSERT INTO itrack_mobilephone_timezone (DEF_CODE,FROM_CODE,TO_CODE,BLOCK_SIZE,TIMEZONE,PHONE_TYPE,GMT,MNC) ';
                     $sql .= 'VALUES ( ';
-                    $sql .= (int)$data[0].',';
-                    $sql .= (int)$data[1].',';
-                    $sql .= (int)$data[2].',';
-                    $sql .= (int)$data[3].',';
+                    $sql .= (int)$data[0] . ',';
+                    $sql .= (int)$data[1] . ',';
+                    $sql .= (int)$data[2] . ',';
+                    $sql .= (int)$data[3] . ',';
 
-                    $sql .= '\''.$DB->ForSql($data[7]).'\',';
-                    $sql .= '\''.$DB->ForSql($data[8]).'\',';
-                    $sql .= '\''.$DB->ForSql($data[9]).'\',';
-                    $sql .= '\''.$DB->ForSql($data[10]).'\')';
+                    $sql .= '\'' . $DB->ForSql($data[7]) . '\',';
+                    $sql .= '\'' . $DB->ForSql($data[8]) . '\',';
+                    $sql .= '\'' . $DB->ForSql($data[9]) . '\',';
+                    $sql .= '\'' . $DB->ForSql($data[10]) . '\')';
                     $DB->Query($sql);
+                }
             }
         }
 
