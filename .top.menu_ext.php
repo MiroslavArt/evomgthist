@@ -221,7 +221,6 @@ if (CModule::IncludeModule("crm") && \Bitrix\Crm\Tracking\Manager::isAccessible(
 		array(),
 		array(
 			"menu_item_id" => "menu_crm_tracking",
-			"is_beta" => true
 		),
 		""
 	);
@@ -596,9 +595,10 @@ while ($site = $rsSite->Fetch())
 {
 	if ($site["LID"] !== $exSiteId && $site["LID"] !== SITE_ID)
 	{
+		$url = ((CMain::IsHTTPS()) ? "https://" : "http://").$site["SERVER_NAME"].$site["DIR"];
 		$arMenuB24[] = array(
-			$site["NAME"],
-			$site["DIR"],
+			htmlspecialcharsbx($site["NAME"]),
+			htmlspecialcharsbx($url),
 			array(),
 			array(),
 			""

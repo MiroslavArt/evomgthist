@@ -19,7 +19,7 @@ $APPLICATION->setPageProperty('BodyClass', trim(sprintf('%s %s', $bodyClass, ' p
                     'FILTER_ID' => $arParams['LIST_ID'],
                     'GRID_ID' => $arParams['LIST_ID'],
                     'FILTER' => $arResult['FILTER_FIELDS'],
-                    'FILTER_PRESETS' => $arResult['FILTER_PRESETS'],
+					'FILTER_PRESETS' => $arResult['FILTER_PRESETS'],
                     'ENABLE_LIVE_SEARCH' => false,
                     'ENABLE_LABEL' => true
                 ],
