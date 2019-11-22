@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS itrack_mobilephone_timezone;
