@@ -17,3 +17,6 @@
     font-weight: 400;
     font-size: 12px;
 }
+.crm-kanban-item-title {
+    padding-right: 25px;
+}
