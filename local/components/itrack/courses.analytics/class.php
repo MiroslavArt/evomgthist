@@ -226,7 +226,13 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 $arSections = [];
 
                 foreach($this->tasks as $arTask) {
-                    if($arTask['UF_CRM_TASK'] == 'D_'.$arDeal['ID'] && $arTask[$this->ufFields['TASK_SESSION']] == $stageId) {
+                    $bFound = false;
+                    foreach($arTask['UF_CRM_TASK'] as $linkedValue) {
+                        if($linkedValue == 'D_'.$arDeal['ID']) {
+                            $bFound = true;
+                        }
+                    }
+                    if($bFound && $arTask[$this->ufFields['TASK_SESSION']] == $stageId) {
                         $arSections[] = [
                             'id' => $arTask['ID'],
                             'name' => $arTask['TITLE'],
@@ -247,7 +253,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 ];
             }
             $result[] = [
-                'name' => $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'],
+                'name' => !empty($this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'])
+                    ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
+                    : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
                 'dealId' => $arDeal['ID'],
                 'contactId' => $arDeal['CONTACT_ID'],
                 'sessions' => $arSessions
@@ -293,7 +301,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         }
         $dbContacts = \Bitrix\Crm\ContactTable::query()
             ->setFilter(['=ID' => $cID])
-            ->setSelect(['ID','SHORT_NAME'])
+            ->setSelect(['ID','SHORT_NAME','FULL_NAME'])
             ->exec();
         while($arContact = $dbContacts->fetch()) {
             $this->contacts[$arContact['ID']] = $arContact;
