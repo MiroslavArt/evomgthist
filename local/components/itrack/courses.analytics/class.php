@@ -222,11 +222,11 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 continue;
             }
             $arSessions = [];
-            foreach($this->stages as $arStage) {
+            foreach($this->stages as $stageId) {
                 $arSections = [];
 
                 foreach($this->tasks as $arTask) {
-                    if($arTask['UF_CRM_TASK'] == $arDeal['ID'] && $arTask[$this->ufFields['TASK_SESSION']] == $arStage['STATUS_ID']) {
+                    if($arTask['UF_CRM_TASK'] == $arDeal['ID'] && $arTask[$this->ufFields['TASK_SESSION']] == $stageId) {
                         $arSections[] = [
                             'id' => $arTask['ID'],
                             'name' => $arTask['TITLE'],
@@ -241,13 +241,13 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 }
 
                 $arSessions[] = [
-                    'id' => $arStage['STATUS_ID'],
-                    'name' => $this->arStagesRef[$arStage['ID']],
+                    'id' => $stageId,
+                    'name' => $this->arStagesRef[$stageId]['NAME'],
                     'sections' => $arSections
                 ];
             }
             $result[] = [
-                'name' => $this->contacts[$arDeal['CONTACT_ID']],
+                'name' => $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'],
                 'dealId' => $arDeal['ID'],
                 'contactId' => $arDeal['CONTACT_ID'],
                 'sessions' => $arSessions
