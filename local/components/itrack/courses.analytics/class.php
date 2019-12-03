@@ -265,6 +265,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         if(!empty($course)) {
             $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
         }
+
+        return $arFilter;
     }
 
     protected function fetchDeals($filter)
