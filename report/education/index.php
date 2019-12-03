@@ -6,7 +6,7 @@ require_once ($_SERVER['DOCUMENT_ROOT'].'/bitrix/header.php');
 $APPLICATION->IncludeComponent(
     'itrack:courses.analytics',
     '',
-    ['CATEGORY_ID' => 37],
+    ['CATEGORY_ID' => 47],
     false
 );
 ?>
