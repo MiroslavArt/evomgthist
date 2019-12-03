@@ -200,6 +200,10 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             ->setOrder(['SORT' => 'asc'])
             ->exec();
         while($arStage = $dbStages->fetch()) {
+            if(\CCrmDeal::GetSemanticID($arStage['STATUS_ID']) == \Bitrix\Crm\PhaseSemantics::FAILURE
+                || \CCrmDeal::GetSemanticID($arStage['STATUS_ID']) == \Bitrix\Crm\PhaseSemantics::SUCCESS) {
+                continue;
+            }
             $this->arStagesRef[$arStage['STATUS_ID']] = $arStage;
             $this->stages[] = $arStage['STATUS_ID'];
         }
@@ -222,6 +226,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 continue;
             }
             $arSessions = [];
+            $countCompleted = 0;
             foreach($this->stages as $stageId) {
                 $arSections = [];
 
@@ -244,6 +249,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                             ]]
                         ];
                     }
+                    if(!empty($arTask['CLOSED_DATE'])) {
+                        $countCompleted++;
+                    }
                 }
 
                 $arSessions[] = [
@@ -258,7 +266,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                     : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
                 'dealId' => $arDeal['ID'],
                 'contactId' => $arDeal['CONTACT_ID'],
-                'sessions' => $arSessions
+                'sessions' => $arSessions,
+                'countCompleted' => $countCompleted
             ];
         }
 
@@ -272,6 +281,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         ];
         if(!empty($course)) {
             $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
+        }
+        if(!empty($date)) {
+            $arFilter['>=BEGINDATE'] = new Bitrix\Main\Type\Date($date, 'Y-m-d');
         }
 
         return $arFilter;

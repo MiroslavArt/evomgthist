@@ -265,15 +265,31 @@ const App = function () {
 
             let html = '';
 
+            let tasksAll = 0;
+            let tasksCompletedHtml = '';
+            let tasksCompletedPercentHtml = '';
+
             Object.entries(data).forEach(session => {
                 let rand = window.crypto.getRandomValues(new Int8Array(1));
+                let button = '';
+                if(session[1].sections.length) {
+                    button = this.templates.collapseButton(rand[0]);
+                    tasksAll += session[1].sections.length;
+                }
 
-                html += `<tr><th>${this.templates.collapseButton(rand[0]) + session[0]}</th>${this.templates.studentsData(studentList, session[1].students)}</tr>`;
+                html += `<tr><th>${button + session[0]}</th>${this.templates.studentsData(studentList, session[1].students)}</tr>`;
 
                 Object.entries(session[1].sections).forEach(section => {
                     html += `<tr data-rand="${rand[0]}" class="c${rand[0]} collapse"><th>${section[0]}</th>${this.templates.studentsData(studentList, section[1].students)}</tr>`;
                 });
             });
+
+            this.courses.forEach(student => {
+                tasksCompletedHtml += `<td>${student.countCompleted}</td>`;
+                tasksCompletedPercentHtml += `<td>${Math.round(student.countCompleted/tasksAll)}</td>`
+            });
+            html += `<tr><th>Кол-во выполненных задач</th>${tasksCompletedHtml}</tr>`;
+            html += `<tr><th>% выполнения</th>${tasksCompletedPercentHtml}</tr>`;
 
             return html;
         },
