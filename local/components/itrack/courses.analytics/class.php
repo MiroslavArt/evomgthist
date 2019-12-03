@@ -218,6 +218,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         $pathToTask = str_replace("#user_id#", $USER->GetID(), $pathToTask);
 
         foreach($this->deals as $arDeal) {
+            if(empty($arDeal['CONTACT_ID'])) {
+                continue;
+            }
             $arSessions = [];
             foreach($this->stages as $arStage) {
                 $arSections = [];
@@ -282,7 +285,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
     {
         $cID = [];
         foreach ($this->deals as $arDeal) {
-            $cID[] = $arDeal['CONTACT_ID'];
+            if(!empty($arDeal['CONTACT_ID'])) {
+                $cID[] = $arDeal['CONTACT_ID'];
+            }
         }
         $dbContacts = \Bitrix\Crm\ContactTable::query()
             ->setFilter(['=ID' => $cID])
@@ -295,12 +300,14 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
 
     protected function fetchTasks()
     {
-        $dbTasks = \Bitrix\Tasks\TaskTable::query()
-            ->setFilter(['UF_CRM_TASK' => array_keys($this->deals)])
-            ->setSelect(['ID', 'TITLE', 'UF_CRM_TASK', $this->ufFields['TASK_SESSION'], 'DEADLINE_COUNTED','DEADLINE','CLOSED_DATE'])
-            ->exec();
-        while($arTask = $dbTasks->fetch()) {
-            $this->tasks[$arTask['ID']] = $arTask;
+        if(!empty($this->deals)) {
+            $dbTasks = \Bitrix\Tasks\TaskTable::query()
+                ->setFilter(['UF_CRM_TASK' => array_keys($this->deals)])
+                ->setSelect(['ID', 'TITLE', 'UF_CRM_TASK', $this->ufFields['TASK_SESSION'], 'DEADLINE_COUNTED', 'DEADLINE', 'CLOSED_DATE'])
+                ->exec();
+            while ($arTask = $dbTasks->fetch()) {
+                $this->tasks[$arTask['ID']] = $arTask;
+            }
         }
     }
 
