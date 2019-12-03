@@ -282,7 +282,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         if(!empty($course)) {
             $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
         }
-        if(!empty($date)) {
+        if(!empty($date) && $date !== null) {
             $arFilter['>=BEGINDATE'] = new Bitrix\Main\Type\Date($date, 'Y-m-d');
         }
 
