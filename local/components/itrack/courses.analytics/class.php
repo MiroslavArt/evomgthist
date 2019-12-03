@@ -298,7 +298,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         return $result;
     }
 
-    public function getPayments($categoryId, $course = 0, $date = '')
+    public function getPaymentsAction($categoryId, $course = 0, $date = '')
     {
         $result = [];
         if($this->includeModules() && $this->checkRights()) {
