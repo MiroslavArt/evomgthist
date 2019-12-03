@@ -272,7 +272,7 @@ const App = function () {
             Object.entries(data).forEach(session => {
                 let rand = window.crypto.getRandomValues(new Int8Array(1));
                 let button = '';
-                if(session[1].sections.length) {
+                if(Object.entries(session[1].sections).length) {
                     button = this.templates.collapseButton(rand[0]);
                     tasksAll += session[1].sections.length;
                 }
@@ -286,7 +286,7 @@ const App = function () {
 
             this.courses.forEach(student => {
                 tasksCompletedHtml += `<td>${student.countCompleted}</td>`;
-                tasksCompletedPercentHtml += `<td>${Math.round(student.countCompleted/tasksAll)}</td>`
+                tasksCompletedPercentHtml += `<td>${tasksAll > 0 ? Math.round(student.countCompleted/tasksAll) : ''}</td>`
             });
             html += `<tr><th>Кол-во выполненных задач</th>${tasksCompletedHtml}</tr>`;
             html += `<tr><th>% выполнения</th>${tasksCompletedPercentHtml}</tr>`;

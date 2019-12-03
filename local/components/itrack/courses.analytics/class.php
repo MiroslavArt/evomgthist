@@ -248,9 +248,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                                 'url' => \CComponentEngine::MakePathFromTemplate($pathToTask, array("task_id" => $arTask["ID"], "action" => "view"))
                             ]]
                         ];
-                    }
-                    if(!empty($arTask['CLOSED_DATE'])) {
-                        $countCompleted++;
+                        if(!empty($arTask['CLOSED_DATE'])) {
+                            $countCompleted++;
+                        }
                     }
                 }
 
@@ -282,7 +282,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         if(!empty($course)) {
             $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
         }
-        if(!empty($date) && $date !== null) {
+        if(!empty($date) && $date !== 'null') {
             $arFilter['>=BEGINDATE'] = new Bitrix\Main\Type\Date($date, 'Y-m-d');
         }
 
