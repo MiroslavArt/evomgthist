@@ -226,7 +226,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 $arSections = [];
 
                 foreach($this->tasks as $arTask) {
-                    if($arTask['UF_CRM_TASK'] == $arDeal['ID'] && $arTask[$this->ufFields['TASK_SESSION']] == $stageId) {
+                    if($arTask['UF_CRM_TASK'] == 'D_'.$arDeal['ID'] && $arTask[$this->ufFields['TASK_SESSION']] == $stageId) {
                         $arSections[] = [
                             'id' => $arTask['ID'],
                             'name' => $arTask['TITLE'],
