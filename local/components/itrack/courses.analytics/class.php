@@ -303,8 +303,13 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
     protected function fetchTasks()
     {
         if(!empty($this->deals)) {
+            $arIDs = [];
+            $dealIDs = array_keys($this->deals);
+            foreach ($dealIDs as $id) {
+                $arIDs[] = 'D_'.$id;
+            }
             $dbTasks = \Bitrix\Tasks\TaskTable::query()
-                ->setFilter(['UF_CRM_TASK' => array_keys($this->deals)])
+                ->setFilter(['UF_CRM_TASK' => $arIDs])
                 ->setSelect(['ID', 'TITLE', 'UF_CRM_TASK', $this->ufFields['TASK_SESSION'], 'DEADLINE_COUNTED', 'DEADLINE', 'CLOSED_DATE'])
                 ->exec();
             while ($arTask = $dbTasks->fetch()) {
