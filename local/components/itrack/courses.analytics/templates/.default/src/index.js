@@ -84,12 +84,21 @@ const App = function () {
             },
             initPayments: function (self) {
                 let container = $('#payments-table');
+                let postData = new FormData();
 
                 if (!container.length) {
                     return;
                 }
 
-                fetch(self.paymentsUrl + '?date=' + self.filter.date + '&course=' + self.filter.course)
+                postData.append('date', self.filter.date);
+                postData.append('course', self.filter.course);
+                postData.append('categoryId', self.filter.categoryId);
+                postData.append('sessid', BX.message('bitrix_sessid'));
+
+                fetch(self.endpoint + '&action=getPayments', {
+                    method: 'POST',
+                    body: postData
+                })
                     .then(res => res.json())
                     .then(res => {
                         self.payments = res;
@@ -324,6 +333,19 @@ const App = function () {
             Object.entries(data).forEach(item => {
                 html += `<tr><th>${item[0]}</th>${this.templates.paymentsData(studentList, item[1].students)}</tr>`;
             });
+
+            let fullPriceHtml = '';
+            let paidPriceHtml = '';
+            let unpaidPriceHtml = '';
+            this.payments.forEach(student => {
+                fullPriceHtml += `<td>${student.fullPrice}</td>`;
+                paidPriceHtml += `<td>${student.currentPaid}</td>`;
+                unpaidPriceHtml += `<td>${student.fullPrice - student.currentPaid}</td>`;
+            });
+
+            html += `<tr><th>Полученная сумма</th>${paidPriceHtml}`;
+            html += `<tr><th>Ожидаемая сумма</th>${unpaidPriceHtml}`;
+            html += `<tr><th>Итого</th>${$fullPriceHtml}`;
 
             return html;
         },

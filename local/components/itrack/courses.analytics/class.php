@@ -13,14 +13,33 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
     protected $tasks = [];
     protected $ufFields = [
         'DEAL_COURSE' => '',
-        'TASK_SESSION' => ''
+        'TASK_SESSION' => '',
+        'DEAL_PAY_SUM_1' => '',
+        'DEAL_PAY_SUM_2' => '',
+        'DEAL_PAY_SUM_3' => '',
+        'DEAL_PAY_SUM_4' => '',
+        'DEAL_PAY_SUM_5' => '',
+        'DEAL_PAY_SUM_6' => '',
+        'DEAL_PAY_DATE_1' => '',
+        'DEAL_PAY_DATE_2' => '',
+        'DEAL_PAY_DATE_3' => '',
+        'DEAL_PAY_DATE_4' => '',
+        'DEAL_PAY_DATE_5' => '',
+        'DEAL_PAY_DATE_6' => '',
+        'DEAL_PAY_PAID_1' => '',
+        'DEAL_PAY_PAID_2' => '',
+        'DEAL_PAY_PAID_3' => '',
+        'DEAL_PAY_PAID_4' => '',
+        'DEAL_PAY_PAID_5' => '',
+        'DEAL_PAY_PAID_6' => '',
     ];
 
     public function configureActions()
     {
         return [
             'getCourses' => [],
-            'getCoursesList' => []
+            'getCoursesList' => [],
+            'getPayments' => []
         ];
     }
 
@@ -29,6 +48,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         if(!empty($arParams['CATEGORY_ID'])) {
             $arParams['CATEGORY_ID'] = (int)$arParams['CATEGORY_ID'];
         }
+        $arParams['IS_PAYMENTS'] = !empty($arParams['TYPE']) && $arParams['TYPE'] == 'payments';
         return parent::onPrepareComponentParams($arParams);
     }
 
@@ -65,6 +85,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             ShowError('Empty category ID');
             return;
         } else {
+            global $APPLICATION;
+            $this->arResult['PAGE_URL'] = $APPLICATION->GetCurDir();
             $this->includeComponentTemplate();
         }
     }
@@ -77,109 +99,6 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             $this->initUserfields();
             $filter = $this->makeDealFilter($categoryId, $course, $date);
             $result = $this->getCoursesData($filter);
-
-            /*$result = [
-                [
-                    "name" => "Дарья Б.",
-                    "dealId" => 15736,
-                    "sessions" => [
-                        [
-                            "name" => "Сессия 1",
-                            "sections" => [
-                                [
-                                    "name" => "Урок первый",
-                                    "tasks" => [
-                                        [
-                                            "id" => 167654,
-                                            "completeTill" => "2019-12-21",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ],
-                                        [
-                                            "id" => 167484,
-                                            "completeTill" => "2019-10-30",
-                                            "completed" => true,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ],
-                        [
-                            "name" => "Сессия 33",
-                            "sections" => [
-                                [
-                                    "name" => "Урок первый",
-                                    "tasks" => [
-                                        [
-                                            "id" => 167654,
-                                            "completeTill" => "2019-12-21",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ],
-                                        [
-                                            "id" => 167484,
-                                            "completeTill" => "2019-10-30",
-                                            "completed" => true,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    "name" => "Роман К.",
-                    "dealId" => 15736,
-                    "sessions" => [
-                        [
-                            "name" => "Сессия 1",
-                            "sections" => [
-                                [
-                                    "name" => "Урок первый",
-                                    "tasks" => [
-                                        [
-                                            "id" => 167654,
-                                            "completeTill" => "2019-12-21",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ],
-                                        [
-                                            "id" => 167484,
-                                            "completeTill" => "2019-10-30",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ],
-                        [
-                            "name" => "Сессия 2",
-                            "sections" => [
-                                [
-                                    "name" => "Урок первый",
-                                    "tasks" => [
-                                        [
-                                            "id" => 167654,
-                                            "completeTill" => "2019-12-21",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ],
-                                        [
-                                            "id" => 167484,
-                                            "completeTill" => "2019-10-30",
-                                            "completed" => false,
-                                            'url' => '/company/personal/user/53/tasks/task/view/5855/'
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ];*/
         }
         return $result;
     }
@@ -188,7 +107,25 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
     {
         $this->ufFields = [
             'DEAL_COURSE' => 'UF_CRM_1573215888', // TODO: get automaticaly
-            'TASK_SESSION' => 'UF_SESSION'
+            'TASK_SESSION' => 'UF_SESSION',
+            'DEAL_PAY_SUM_1' => 'UF_CRM_1572207520',
+            'DEAL_PAY_DATE_1' => 'UF_CRM_1572207664',
+            'DEAL_PAY_SUM_2' => 'UF_CRM_1572874606',
+            'DEAL_PAY_DATE_2' => 'UF_CRM_1572874559',
+            'DEAL_PAY_SUM_3' => 'UF_CRM_1572874797',
+            'DEAL_PAY_DATE_3' => 'UF_CRM_1572874748',
+            'DEAL_PAY_SUM_4' => 'UF_CRM_1572874967',
+            'DEAL_PAY_DATE_4' => 'UF_CRM_1572874904',
+            'DEAL_PAY_SUM_5' => 'UF_CRM_1572875149',
+            'DEAL_PAY_DATE_5' => 'UF_CRM_1572875105',
+            'DEAL_PAY_SUM_6' => 'UF_CRM_1572875331',
+            'DEAL_PAY_DATE_6' => 'UF_CRM_1572875271',
+            'DEAL_PAY_PAID_1' => 'UF_CRM_1575378171',
+            'DEAL_PAY_PAID_2' => 'UF_CRM_1575378273',
+            'DEAL_PAY_PAID_3' => 'UF_CRM_1575378308',
+            'DEAL_PAY_PAID_4' => 'UF_CRM_1575378419',
+            'DEAL_PAY_PAID_5' => 'UF_CRM_1575378439',
+            'DEAL_PAY_PAID_6' => 'UF_CRM_1575378497'
         ];
     }
 
@@ -291,12 +228,18 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
 
     protected function fetchDeals($filter)
     {
+        $arSelect = ['ID','CONTACT_ID','STAGE_ID'];
+        for($i = 1; $i <= 6; $i++) {
+            $arSelect[] = $this->ufFields['DEAL_PAY_SUM_'.$i];
+            $arSelect[] = $this->ufFields['DEAL_PAY_DATE_'.$i];
+            $arSelect[] = $this->ufFields['DEAL_PAY_PAID_'.$i];
+        }
         $dbDeals = \CCrmDeal::GetListEx(
             [],
             $filter,
             false,
             false,
-            ['ID','CONTACT_ID','STAGE_ID']
+            []
         );
         while($arDeal = $dbDeals->Fetch()) {
             $this->deals[$arDeal['ID']] = $arDeal;
@@ -352,20 +295,64 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 ];
             }
         }
-        /*$result = [
-            [
-                "id" => 1,
-                "name" => "Курс 1_"
-            ],
-            [
-                "id" => 2,
-                "name" => "Курс 2_"
-            ],
-            [
-                "id" => 3,
-                "name" => "Курс 3_"
-            ]
-        ];*/
+        return $result;
+    }
+
+    public function getPayments($categoryId, $course = 0, $date = '')
+    {
+        $result = [];
+        if($this->includeModules() && $this->checkRights()) {
+            $this->initStages($categoryId);
+            $this->initUserfields();
+            $filter = $this->makeDealFilter($categoryId, $course, $date);
+            $result = $this->getPaymentsData($filter);
+        }
+        return $result;
+    }
+
+    public function getPaymentsData($filter)
+    {
+        $result = [];
+
+        $this->fetchDeals($filter);
+        $this->fetchContacts();
+
+        foreach($this->deals as $arDeal) {
+            if (empty($arDeal['CONTACT_ID'])) {
+                continue;
+            }
+
+            $arPayments = [];
+            $fullPrice = 0;
+            $currentPaid = 0;
+
+            for($i = 1; $i <= 6; $i++) {
+                if(!empty($arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])) {
+                    $arPayments[] = [
+                        "name" => "Оплата ".$i,
+                        "sum" => $arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]],
+                        "paid" => $arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]],
+                        "payTill" => !empty($arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]) ? $arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]->format('Y-m-d') : ''
+                    ];
+                    $fullPrice += (int)$arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]];
+                    if($arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]]) {
+                        $currentPaid += (int)$arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]];
+                    }
+                }
+            }
+
+            $result[] = [
+                'name' => !empty($this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'])
+                    ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
+                    : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
+                'dealId' => $arDeal['ID'],
+                'contactId' => $arDeal['CONTACT_ID'],
+                'payments' => $arPayments,
+                'fullPrice' => $fullPrice,
+                'currentPaid' => $currentPaid
+            ];
+        }
+
         return $result;
     }
 }
