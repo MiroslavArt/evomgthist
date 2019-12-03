@@ -308,12 +308,15 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
     {
         $result = [];
         $this->initUserfields();
-        $dbList = \CUserFieldEnum::GetList(array(), array("USER_FIELD_NAME"=>$this->ufFields['DEAL_COURSE']));
-        while($arValue = $dbList->Fetch()) {
-            $result[] = [
-                'id' => $arValue['ID'],
-                'name' => $arValue['VALUE']
-            ];
+        $dbUserField = \CUserTypeEntity::GetList([],['FIELD_NAME' => $this->ufFields['DEAL_COURSE'], 'ENTITY_ID' => 'CRM_DEAL']);
+        if($arUF = $dbUserField->Fetch()) {
+            $dbList = \CUserFieldEnum::GetList(array(), array("USER_FIELD_ID" => $arUF['ID']));
+            while ($arValue = $dbList->Fetch()) {
+                $result[] = [
+                    'id' => $arValue['ID'],
+                    'name' => $arValue['VALUE']
+                ];
+            }
         }
         /*$result = [
             [
