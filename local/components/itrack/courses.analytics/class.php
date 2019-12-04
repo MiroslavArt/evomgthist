@@ -328,15 +328,16 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
 
             for($i = 1; $i <= 6; $i++) {
                 if(!empty($arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])) {
+                    $sum = (int)explode('|', $arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])[0];
                     $arPayments[] = [
                         "name" => "Оплата ".$i,
-                        "sum" => $arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]],
+                        "sum" => $sum,
                         "paid" => $arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]],
-                        "payTill" => !empty($arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]) ? $arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]->format('Y-m-d') : ''
+                        "payTill" => !empty($arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]) ? $arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]] : ''
                     ];
-                    $fullPrice += (int)$arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]];
+                    $fullPrice += $sum;
                     if($arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]]) {
-                        $currentPaid += (int)$arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]];
+                        $currentPaid += $sum;
                     }
                 }
             }

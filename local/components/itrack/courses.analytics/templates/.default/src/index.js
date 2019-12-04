@@ -345,7 +345,7 @@ const App = function () {
 
             html += `<tr><th>Полученная сумма</th>${paidPriceHtml}`;
             html += `<tr><th>Ожидаемая сумма</th>${unpaidPriceHtml}`;
-            html += `<tr><th>Итого</th>${$fullPriceHtml}`;
+            html += `<tr><th>Итого</th>${fullPriceHtml}`;
 
             return html;
         },
