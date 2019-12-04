@@ -216,7 +216,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         $arFilter = [
             'CATEGORY_ID' => $categoryId
         ];
-        if(!empty($course)) {
+        if(!empty($course) && $course !== 'null') {
             $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
         }
         if(!empty($date) && $date !== 'null') {
