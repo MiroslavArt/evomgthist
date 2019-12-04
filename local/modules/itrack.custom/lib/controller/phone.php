@@ -26,11 +26,15 @@ class Phone extends Controller
         $result = [];
         if(!empty($phones)) {
             foreach($phones as $phone) {
-                $phoneHelper = new PhoneHelper($phone);
-                $result[] = [
-                    'phone' => $phone,
-                    'timezone' => $phoneHelper->getTimezone()
-                ];
+                try {
+                    $phoneHelper = new PhoneHelper($phone);
+                    $result[] = [
+                        'phone' => $phone,
+                        'timezone' => $phoneHelper->getTimezone()
+                    ];
+                } catch(\Exception $e) {
+
+                }
             }
         }
         return $result;
