@@ -101,7 +101,7 @@ const App = function () {
                 })
                     .then(res => res.json())
                     .then(res => {
-                        self.payments = res;
+                        self.payments = res.data;
                         self.renderPayments();
                     })
             },

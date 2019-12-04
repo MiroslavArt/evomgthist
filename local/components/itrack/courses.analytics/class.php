@@ -239,7 +239,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             $filter,
             false,
             false,
-            []
+            $arSelect
         );
         while($arDeal = $dbDeals->Fetch()) {
             $this->deals[$arDeal['ID']] = $arDeal;
