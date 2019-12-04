@@ -283,7 +283,7 @@ const App = function () {
                 let button = '';
                 if(Object.entries(session[1].sections).length) {
                     button = this.templates.collapseButton(rand[0]);
-                    tasksAll += session[1].sections.length;
+                    tasksAll += Object.entries(session[1].sections).length;
                 }
 
                 html += `<tr><th>${button + session[0]}</th>${this.templates.studentsData(studentList, session[1].students)}</tr>`;
