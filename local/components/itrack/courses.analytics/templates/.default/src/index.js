@@ -295,7 +295,7 @@ const App = function () {
 
             this.courses.forEach(student => {
                 tasksCompletedHtml += `<td>${student.countCompleted}</td>`;
-                tasksCompletedPercentHtml += `<td>${tasksAll > 0 ? Math.round(student.countCompleted/tasksAll) : ''}</td>`
+                tasksCompletedPercentHtml += `<td>${tasksAll > 0 ? Math.round((student.countCompleted/tasksAll)*100) : ''}</td>`
             });
             html += `<tr><th>Кол-во выполненных задач</th>${tasksCompletedHtml}</tr>`;
             html += `<tr><th>% выполнения</th>${tasksCompletedPercentHtml}</tr>`;
