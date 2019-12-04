@@ -40,3 +40,4 @@ cgi-bin/
 .bash_history
 /db.sql
 /local.zip
+*node_modules*

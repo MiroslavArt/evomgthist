@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Дарья Б.",
+    "dealId": 15736,
+    "sessions": [
+      {
+        "name": "Сессия 1",
+        "sections": [
+          {
+            "name": "Урок первый",
+            "tasks": [
+              {
+                "id": 167654,
+                "completeTill": "2019-12-21",
+                "completed": false
+              },
+              {
+                "id": 167484,
+                "completeTill": "2019-10-30",
+                "completed": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Сессия 33",
+        "sections": [
+          {
+            "name": "Урок первый",
+            "tasks": [
+              {
+                "id": 167654,
+                "completeTill": "2019-12-21",
+                "completed": false
+              },
+              {
+                "id": 167484,
+                "completeTill": "2019-10-30",
+                "completed": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Роман К.",
+    "dealId": 15736,
+    "sessions": [
+      {
+        "name": "Сессия 1",
+        "sections": [
+          {
+            "name": "Урок первый",
+            "tasks": [
+              {
+                "id": 167654,
+                "completeTill": "2019-12-21",
+                "completed": false
+              },
+              {
+                "id": 167484,
+                "completeTill": "2019-10-30",
+                "completed": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Сессия 2",
+        "sections": [
+          {
+            "name": "Урок первый",
+            "tasks": [
+              {
+                "id": 167654,
+                "completeTill": "2019-12-21",
+                "completed": false
+              },
+              {
+                "id": 167484,
+                "completeTill": "2019-10-30",
+                "completed": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

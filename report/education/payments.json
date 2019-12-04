@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Дарья Б.",
+    "dealId": 15736,
+    "payments": [
+      {
+        "name": "Оплата 1",
+        "sum": 40000,
+        "paid": true,
+        "payTill": "2019-09-01"
+      },
+      {
+        "name": "Оплата 2",
+        "sum": 45000,
+        "paid": false,
+        "payTill": "2019-10-01"
+      },
+      {
+        "name": "Оплата 3",
+        "sum": 3000,
+        "paid": false,
+        "payTill": "2019-12-31"
+      }
+    ]
+  },
+  {
+    "name": "Роман К.",
+    "dealId": 15736,
+    "payments": [
+      {
+        "name": "Оплата 1",
+        "sum": 40000,
+        "paid": true,
+        "payTill": "2019-09-01"
+      },
+      {
+        "name": "Оплата 3",
+        "sum": 3000,
+        "paid": false,
+        "payTill": "2019-12-31"
+      }
+    ]
+  }
+]

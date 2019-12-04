@@ -3,13 +3,17 @@
 namespace iTrack\Custom;
 
 use Bitrix\Main\Config\Option;
+use Bitrix\Main\EventManager;
 use Bitrix\Main\Page\Asset;
 
 class Application
 {
+    const DEAL_CATEGORY_EDUCATION_ID = 47;
+
     public static function init()
     {
         self::initPhoneTimezones();
+        self::initEventHandlers();
     }
 
     protected static function initPhoneTimezones()
@@ -53,5 +57,12 @@ class Application
             $asset = Asset::getInstance();
             $asset->addString('<script>BX.ready(function () {BX.iTrack.Crm.PhoneTimezone.init("'.$type.'");});</script>');
         }
+    }
+
+    public static function initEventHandlers()
+    {
+        $eventManager = EventManager::getInstance();
+
+        $eventManager->addEventHandler('tasks','OnTaskAdd', ['\iTrack\Custom\Handlers\Tasks','onTaskAdd']);
     }
 }
