@@ -334,18 +334,22 @@ const App = function () {
                 html += `<tr><th>${item[0]}</th>${this.templates.paymentsData(studentList, item[1].students)}</tr>`;
             });
 
+            let fullPrice = 0;
+            let paidPrice = 0;
             let fullPriceHtml = '';
             let paidPriceHtml = '';
             let unpaidPriceHtml = '';
             this.payments.forEach(student => {
+                fullPrice += student.fullPrice;
+                paidPrice += student.currentPaid;
                 fullPriceHtml += `<td>${student.fullPrice}</td>`;
                 paidPriceHtml += `<td>${student.currentPaid}</td>`;
                 unpaidPriceHtml += `<td>${student.fullPrice - student.currentPaid}</td>`;
             });
 
-            html += `<tr><th>Полученная сумма</th>${paidPriceHtml}`;
-            html += `<tr><th>Ожидаемая сумма</th>${unpaidPriceHtml}`;
-            html += `<tr><th>Итого</th>${fullPriceHtml}`;
+            html += `<tr><th>Полученная сумма<span class="full-sum">${paidPrice}</span></th>${paidPriceHtml}`;
+            html += `<tr><th>Ожидаемая сумма<span class="full-sum"${fullPrice - paidPrice}></span></th>${unpaidPriceHtml}`;
+            html += `<tr><th>Итого<span class="full-sum">${fullPrice}</span></th>${fullPriceHtml}`;
 
             return html;
         },
