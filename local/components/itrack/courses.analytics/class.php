@@ -121,9 +121,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             'DEAL_PAY_SUM_6' => 'UF_CRM_1572875331',
             'DEAL_PAY_DATE_6' => 'UF_CRM_1572875271',
             'DEAL_PAY_PAID_1' => 'UF_CRM_1575378171',
-            'DEAL_PAY_PAID_2' => 'UF_CRM_1575378273',
-            'DEAL_PAY_PAID_3' => 'UF_CRM_1575378308',
-            'DEAL_PAY_PAID_4' => 'UF_CRM_1575378419',
+            'DEAL_PAY_PAID_2' => 'UF_CRM_1575545399964',
+            'DEAL_PAY_PAID_3' => 'UF_CRM_1575545686478',
+            'DEAL_PAY_PAID_4' => 'UF_CRM_1575545894693',
             'DEAL_PAY_PAID_5' => 'UF_CRM_1575378439',
             'DEAL_PAY_PAID_6' => 'UF_CRM_1575378497'
         ];
@@ -157,6 +157,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         global $USER;
         $pathToTask = Option::get("tasks", "paths_task_user_action", null, SITE_ID);
         $pathToTask = str_replace("#user_id#", $USER->GetID(), $pathToTask);
+
+        $pathToDeal = Option::get('crm', 'path_to_deal_details', '', SITE_ID);
 
         foreach($this->deals as $arDeal) {
             if(empty($arDeal['CONTACT_ID'])) {
@@ -202,6 +204,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                     ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
                     : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
                 'dealId' => $arDeal['ID'],
+                'href' => \CComponentEngine::MakePathFromTemplate($pathToDeal, ["deal_id" => $arDeal["ID"]]),
                 'contactId' => $arDeal['CONTACT_ID'],
                 'sessions' => $arSessions,
                 'countCompleted' => $countCompleted
@@ -272,7 +275,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 $arIDs[] = 'D_'.$id;
             }
             $dbTasks = \Bitrix\Tasks\TaskTable::query()
-                ->setFilter(['UF_CRM_TASK' => $arIDs])
+                ->setFilter(['UF_CRM_TASK' => $arIDs, 'ZOMBIE' => 'N'])
                 ->setSelect(['ID', 'TITLE', 'UF_CRM_TASK', $this->ufFields['TASK_SESSION'], 'DEADLINE_COUNTED', 'DEADLINE', 'CLOSED_DATE'])
                 ->exec();
             while ($arTask = $dbTasks->fetch()) {
@@ -317,6 +320,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         $this->fetchDeals($filter);
         $this->fetchContacts();
 
+        $pathToDeal = Option::get('crm', 'path_to_deal_details', '', SITE_ID);
+
         foreach($this->deals as $arDeal) {
             if (empty($arDeal['CONTACT_ID'])) {
                 continue;
@@ -330,7 +335,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 if(!empty($arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])) {
                     $sum = (int)explode('|', $arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])[0];
                     $date = '';
-                    if(!empty(!empty($arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]]))) {
+                    if(!empty($arDeal[$this->ufFields['DEAL_PAY_DATE_'.$i]])) {
                         try {
                             $obDate = new \Bitrix\Main\Type\Date($arDeal[$this->ufFields['DEAL_PAY_DATE_' . $i]], 'd.m.Y');
                             $date = $obDate->format('Y-m-d');
@@ -356,6 +361,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                     ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
                     : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
                 'dealId' => $arDeal['ID'],
+                'href' => \CComponentEngine::MakePathFromTemplate($pathToDeal, ["deal_id" => $arDeal["ID"]]),
                 'contactId' => $arDeal['CONTACT_ID'],
                 'payments' => $arPayments,
                 'fullPrice' => $fullPrice,

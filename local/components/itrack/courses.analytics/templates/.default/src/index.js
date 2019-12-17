@@ -190,7 +190,7 @@ const App = function () {
                 let html = '';
 
                 data.forEach(student => {
-                    html += `<th>${student.name}</th>`;
+                    html += `<th><a href="${student.href}">${student.name}</a></th>`;
                 });
 
                 return html;
