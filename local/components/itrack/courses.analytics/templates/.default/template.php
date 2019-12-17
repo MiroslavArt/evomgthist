@@ -35,10 +35,10 @@ $this->addExternalJs($this->__folder.'/dist/bundle.js');
 
 <?php
 if($arParams['IS_PAYMENTS']){?>
-    <div class="" id="payments-table"></div>
+    <div class="ca__result-table" id="payments-table"></div>
 <?php
 } else {?>
-    <div class="" id="courses-table"></div>
+    <div class="ca__result-table" id="courses-table"></div>
 <?php
 }
 ?>

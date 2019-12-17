@@ -16,3 +16,10 @@ body {
 .payment-alert {
   margin: 0;
 }
+
+.ca__result-table table thead th {
+  min-width: 162px;
+}
+.ca__result-table table thead th:first-child {
+  width: 250px;
+}
