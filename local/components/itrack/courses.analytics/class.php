@@ -199,10 +199,9 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                     'sections' => $arSections
                 ];
             }
+            $name = $this->contacts[$arDeal['CONTACT_ID']]['LAST_NAME'].' '.$this->contacts[$arDeal['CONTACT_ID']]['NAME'];
             $result[] = [
-                'name' => !empty($this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'])
-                    ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
-                    : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
+                'name' => $name,
                 'dealId' => $arDeal['ID'],
                 'href' => \CComponentEngine::MakePathFromTemplate($pathToDeal, ["deal_id" => $arDeal["ID"]]),
                 'contactId' => $arDeal['CONTACT_ID'],
@@ -259,7 +258,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         }
         $dbContacts = \Bitrix\Crm\ContactTable::query()
             ->setFilter(['=ID' => $cID])
-            ->setSelect(['ID','SHORT_NAME','FULL_NAME'])
+            ->setSelect(['ID','NAME','LAST_NAME','SECOND_NAME','SHORT_NAME','FULL_NAME'])
             ->exec();
         while($arContact = $dbContacts->fetch()) {
             $this->contacts[$arContact['ID']] = $arContact;
@@ -356,10 +355,10 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                 }
             }
 
+            $name = $this->contacts[$arDeal['CONTACT_ID']]['LAST_NAME'].' '.$this->contacts[$arDeal['CONTACT_ID']]['NAME'];
+
             $result[] = [
-                'name' => !empty($this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME'])
-                    ? $this->contacts[$arDeal['CONTACT_ID']]['SHORT_NAME']
-                    : $this->contacts[$arDeal['CONTACT_ID']]['FULL_NAME'],
+                'name' => $name,
                 'dealId' => $arDeal['ID'],
                 'href' => \CComponentEngine::MakePathFromTemplate($pathToDeal, ["deal_id" => $arDeal["ID"]]),
                 'contactId' => $arDeal['CONTACT_ID'],

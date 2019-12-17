@@ -69,6 +69,7 @@ const App = function () {
                     self.filter.course = $('#filter-course').val();
 
                     self.initializators.initCourses(self);
+                    self.initializators.initPayments(self);
 
                     return false;
                 });
