@@ -348,7 +348,7 @@ const App = function () {
             });
 
             html += `<tr><th>Полученная сумма<span class="full-sum">${paidPrice}</span></th>${paidPriceHtml}`;
-            html += `<tr><th>Ожидаемая сумма<span class="full-sum"${fullPrice - paidPrice}></span></th>${unpaidPriceHtml}`;
+            html += `<tr><th>Ожидаемая сумма<span class="full-sum">${fullPrice - paidPrice}</span></th>${unpaidPriceHtml}`;
             html += `<tr><th>Итого<span class="full-sum">${fullPrice}</span></th>${fullPriceHtml}`;
 
             return html;
