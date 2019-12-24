@@ -9,9 +9,13 @@ if (SITE_TEMPLATE_ID !== "bitrix24")
 	return;
 }
 
+use \Bitrix\Landing\Rights;
+
 global $APPLICATION;
 
 IncludeModuleLangFile($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/intranet/public/.top.menu_ext.php");
+
+$bLandingIncluded = \Bitrix\Main\Loader::includeModule("landing");
 
 if (!function_exists("getLeftMenuItemLink"))
 {
@@ -300,26 +304,35 @@ if (CModule::IncludeModule("sender") && \Bitrix\Sender\Security\Access::current(
 	);
 }
 
-if (
-	\Bitrix\Main\Loader::includeModule("landing") &&
-	(
-		!is_callable(["\Bitrix\Landing\Rights", "hasAdditionalRight"]) ||
-		\Bitrix\Landing\Rights::hasAdditionalRight(
-			\Bitrix\Landing\Rights::ADDITIONAL_RIGHTS["menu24"]
-		)
-	)
-)
+if ($bLandingIncluded)
 {
-	$arMenuB24[] = array(
-		GetMessage("TOP_MENU_SITES"),
-		SITE_DIR."sites/",
-		array(),
-		array(
-			"menu_item_id" => "menu_sites",
-			"my_tools_section" => true
-		),
-		""
-	);
+	if (Rights::hasAdditionalRight(Rights::ADDITIONAL_RIGHTS["menu24"]))
+	{
+		$arMenuB24[] = array(
+			GetMessage("TOP_MENU_SITES"),
+			SITE_DIR."sites/",
+			array(),
+			array(
+				"menu_item_id" => "menu_sites",
+				"my_tools_section" => true
+			),
+			""
+		);
+	}
+	if (Rights::hasAdditionalRight(Rights::ADDITIONAL_RIGHTS["menu24"], "knowledge"))
+	{
+		$arMenuB24[] = array(
+			GetMessage("TOP_MENU_KNOWLEDGE"),
+			SITE_DIR."kb/",
+			array(),
+			array(
+				"menu_item_id" => "menu_knowledge",
+				"my_tools_section" => true,
+				"is_beta" => true,
+			),
+			""
+		);
+	}
 }
 
 if (CModule::IncludeModule("im"))
@@ -378,6 +391,25 @@ if (CModule::IncludeModule("socialnetwork"))
 		) + ($canCreateGroup ? array("sub_link" => SITE_DIR."company/personal/user/".$userId."/groups/create/") : array()),
 		"CBXFeatures::IsFeatureEnabled('Workgroups')"
 	);
+}
+
+if(\Bitrix\Main\Loader::includeModule('rpa') && \Bitrix\Rpa\Driver::getInstance()->isEnabled())
+{
+	$arMenuB24[] = [
+		\Bitrix\Main\Localization\Loc::getMessage("MENU_RPA_SECTION"),
+		"/rpa/",
+		[],
+		[
+			"real_link" => getLeftMenuItemLink(
+				"top_menu_id_rpa",
+				"/rpa/"
+			),
+			"menu_item_id" => "menu_rpa",
+			"top_menu_id" => "top_menu_id_rpa",
+			"is_beta" => true,
+		],
+		""
+	];
 }
 
 if (\Bitrix\Main\ModuleManager::isModuleInstalled("bizproc"))
