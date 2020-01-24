@@ -186,7 +186,7 @@ const App = function () {
 
                 let paymentDate = new Date(payment.payTill);
 
-                let halfSum = parseInt(payment.sum);
+                let halfSum = parseInt(payment.sum) / 2;
                 let listClassTheory = 'default';
                 let listClassPractice = 'default';
                 let html = `<ul class=list-group>`;
