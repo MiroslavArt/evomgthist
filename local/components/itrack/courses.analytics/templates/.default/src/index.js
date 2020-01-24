@@ -195,12 +195,12 @@ const App = function () {
                     if(payment.theoryCompleted) {
                         listClassTheory = 'success';
                     } else {
-                        listClassTheory = 'info'
+                        listClassTheory = 'warning'
                     }
                     if(payment.practiceCompleted) {
                         listClassPractice = 'success';
                     } else {
-                        listClassPractice = 'info';
+                        listClassPractice = 'warning';
                     }
                 }
                  else if (paymentDate < now) {
