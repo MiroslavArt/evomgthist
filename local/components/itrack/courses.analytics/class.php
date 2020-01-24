@@ -449,7 +449,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                         if($arStage['NAME'] == $i.' сессия') {
                             foreach($arTasks[$arStage['STATUS_ID']] as $task) {
                                 if(!$task['completed']) {
-                                    $practiceCompleted = false;
+                                    $theoryCompleted = false;
                                     break;
                                 }
                             }
@@ -457,7 +457,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
                         if($arStage['NAME'] == 'ПВ-'.$i) {
                             foreach($arTasks[$arStage['STATUS_ID']] as $task) {
                                 if(!$task['completed']) {
-                                    $theoryCompleted = false;
+                                    $practiceCompleted = false;
                                     break;
                                 }
                             }
