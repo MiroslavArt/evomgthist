@@ -2,6 +2,9 @@
 
 use Bitrix\Main\Engine\Contract\Controllerable;
 use Bitrix\Main\Config\Option;
+use Bitrix\Main\Localization\Loc;
+
+Loc::loadMessages(__FILE__);
 
 class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerable
 {
@@ -32,13 +35,17 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         'DEAL_PAY_PAID_4' => '',
         'DEAL_PAY_PAID_5' => '',
         'DEAL_PAY_PAID_6' => '',
+        'DEAL_COURSE_GROUP' => ''
     ];
+
+    const FILTER_ID_PREFIX = 'itrack_courses_analytics_';
 
     public function configureActions()
     {
         return [
             'getCourses' => [],
             'getCoursesList' => [],
+            'getGroupList' => [],
             'getPayments' => []
         ];
     }
@@ -49,6 +56,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             $arParams['CATEGORY_ID'] = (int)$arParams['CATEGORY_ID'];
         }
         $arParams['IS_PAYMENTS'] = !empty($arParams['TYPE']) && $arParams['TYPE'] == 'payments';
+        $arParams['FILTER_ID'] = self::FILTER_ID_PREFIX.$arParams['CATEGORY_ID'].$arParams['TYPE'];
         return parent::onPrepareComponentParams($arParams);
     }
 
@@ -87,17 +95,42 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         } else {
             global $APPLICATION;
             $this->arResult['PAGE_URL'] = $APPLICATION->GetCurDir();
+            $this->initFilter();
             $this->includeComponentTemplate();
         }
     }
 
-    public function getCoursesAction($categoryId, $course = 0, $date = '')
+    protected function initFilter()
+    {
+        $arCourses = $this->getCoursesListAction();
+        $arFilterCourses = [];
+        foreach($arCourses as $arCourse) {
+            $arFilterCourses[$arCourse['id']] = $arCourse['name'];
+        }
+        $arGroups = $this->getGroupListAction();
+        $arFilterGroups = [];
+        foreach($arGroups as $arGroup) {
+            $arFilterGroups[$arGroup['id']] = $arGroup['name'];
+        }
+        $this->arResult['FILTER_FIELDS'] = [
+            ['id' => 'COURSE', 'name' => Loc::getMessage('ITRACK_CAC_COLUMN_COURSE_NAME'), 'type' => 'list', 'params' => ['multiple' => true], 'items' => $arFilterCourses, 'default' => true],
+            ['id' => 'INTERVAL', 'name' => Loc::getMessage('ITRACK_CAC_COLUMN_INTERVAL_NAME'), 'type' => 'date', 'default' => true]
+        ];
+        if(!$this->arParams['IS_PAYMENTS']) {
+            $this->arResult['FILTER_FIELDS'][] = ['id' => 'COURSE_GROUP', 'name' => Loc::getMessage('ITRACK_CAC_COLUMN_COURSE_GROUP_NAME'), 'type' => 'list', 'params' => ['multiple' => true], 'items' => $arFilterGroups, 'default' => true];
+            $this->arResult['FILTER_FIELDS'][] = ['id' => 'ASSIGNED_BY_ID', 'name' => Loc::getMessage('ITRACK_CAC_COLUMN_ASSIGNED_BY_ID_NAME'), 'params' => ['multiple' => true], 'type' => 'custom_entity', 'default' => true];
+        } else {
+            $this->arResult['FILTER_FIELDS'][] = ['id' => 'PAYDATE', 'name' => Loc::getMessage('ITRACK_CAC_COLUMN_PAYDATE_NAME'), 'type' => 'date', 'default' => true];
+        }
+    }
+
+    public function getCoursesAction($categoryId)
     {
         $result = [];
         if($this->includeModules() && $this->checkRights()) {
             $this->initStages($categoryId);
             $this->initUserfields();
-            $filter = $this->makeDealFilter($categoryId, $course, $date);
+            $filter = $this->makeDealFilter($categoryId);
             $result = $this->getCoursesData($filter);
         }
         return $result;
@@ -125,7 +158,8 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             'DEAL_PAY_PAID_3' => 'UF_CRM_1575545686478',
             'DEAL_PAY_PAID_4' => 'UF_CRM_1575545894693',
             'DEAL_PAY_PAID_5' => 'UF_CRM_1575378439',
-            'DEAL_PAY_PAID_6' => 'UF_CRM_1575378497'
+            'DEAL_PAY_PAID_6' => 'UF_CRM_1575378497',
+            'DEAL_COURSE_GROUP' => 'UF_CRM_1573216197'
         ];
     }
 
@@ -213,16 +247,49 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         return $result;
     }
 
-    protected function makeDealFilter($categoryId, $course = 0, $date = '')
+    protected function makeDealFilter($categoryId, $isPayment = false)
     {
+        $obFilterOption = new \Bitrix\Main\UI\Filter\Options(self::FILTER_ID_PREFIX.$categoryId.($isPayment ? 'payments' : ''));
+        $arFilterData = $obFilterOption->getFilter();
         $arFilter = [
             'CATEGORY_ID' => $categoryId
         ];
-        if(!empty($course) && $course !== 'null') {
-            $arFilter[$this->ufFields['DEAL_COURSE']] = $course;
+        if(!empty($arFilterData['COURSE'])) {
+            $arFilter[$this->ufFields['DEAL_COURSE']] = $arFilterData['COURSE'];
         }
-        if(!empty($date) && $date !== 'null') {
-            $arFilter['>=BEGINDATE'] = new Bitrix\Main\Type\Date($date, 'Y-m-d');
+        if(isset($arFilterData['INTERVAL_from']) && $arFilterData['INTERVAL_from']) {
+            $arFilter['>=BEGINDATE'] = $arFilterData['INTERVAL_from'];
+        }
+        if(isset($arFilterData['INTERVAL_to']) && $arFilterData['INTERVAL_to']) {
+            $arFilter['<=BEGINDATE'] = $arFilterData['INTERVAL_to'];
+        }
+        if(!empty($arFilterData['COURSE_GROUP'])) {
+            $arFilter[$this->ufFields['DEAL_COURSE_GROUP']] = $arFilterData['COURSE_GROUP'];
+        }
+        if(!empty($arFilterData['ASSIGNED_BY_ID'])) {
+            $arFilter['ASSIGNED_BY_ID'] = $arFilterData['ASSIGNED_BY_ID'];
+        }
+        if(!empty($arFilterData['FIND'])) {
+            $arFilter[] = [
+                'LOGIC' => 'OR',
+                ['%TITLE' => $arFilterData['FIND']],
+                ['%CONTACT_NAME' => $arFilterData['FIND']],
+                ['%CONTACT_FULL_NAME' => $arFilterData['FIND']]
+            ];
+        }
+        if(isset($arFilterData['PAYDATE_from']) && $arFilterData['PAYDATE_from']) {
+            $arPDFilter = ['LOGIC' => 'OR'];
+            for($i = 1; $i <= 6; $i++) {
+                $arPDFilter[] = ['>='.$this->ufFields['DEAL_PAY_DATE_'.$i] => $arFilterData['PAYDATE_from']];
+            }
+            $arFilter[] = $arPDFilter;
+        }
+        if(isset($arFilterData['PAYDATE_to']) && $arFilterData['PAYDATE_to']) {
+            $arPDFilter = ['LOGIC' => 'OR'];
+            for($i = 1; $i <= 6; $i++) {
+                $arPDFilter[] = ['<='.$this->ufFields['DEAL_PAY_DATE_'.$i] => $arFilterData['PAYDATE_to']];
+            }
+            $arFilter[] = $arPDFilter;
         }
 
         return $arFilter;
@@ -300,13 +367,30 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
         return $result;
     }
 
-    public function getPaymentsAction($categoryId, $course = 0, $date = '')
+    public function getGroupListAction()
+    {
+        $result = [];
+        $this->initUserfields();
+        $dbUserField = \CUserTypeEntity::GetList([],['FIELD_NAME' => $this->ufFields['DEAL_COURSE_GROUP'], 'ENTITY_ID' => 'CRM_DEAL']);
+        if($arUF = $dbUserField->Fetch()) {
+            $dbList = \CUserFieldEnum::GetList(array(), array("USER_FIELD_ID" => $arUF['ID']));
+            while ($arValue = $dbList->Fetch()) {
+                $result[] = [
+                    'id' => $arValue['ID'],
+                    'name' => $arValue['VALUE']
+                ];
+            }
+        }
+        return $result;
+    }
+
+    public function getPaymentsAction($categoryId)
     {
         $result = [];
         if($this->includeModules() && $this->checkRights()) {
             $this->initStages($categoryId);
             $this->initUserfields();
-            $filter = $this->makeDealFilter($categoryId, $course, $date);
+            $filter = $this->makeDealFilter($categoryId, true);
             $result = $this->getPaymentsData($filter);
         }
         return $result;
@@ -318,6 +402,7 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
 
         $this->fetchDeals($filter);
         $this->fetchContacts();
+        $this->fetchTasks();
 
         $pathToDeal = Option::get('crm', 'path_to_deal_details', '', SITE_ID);
 
@@ -329,6 +414,20 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
             $arPayments = [];
             $fullPrice = 0;
             $currentPaid = 0;
+
+            $arTasks = [];
+
+            foreach($this->tasks as $arTask) {
+                foreach($arTask['UF_CRM_TASK'] as $linkedValue) {
+                    if($linkedValue == 'D_'.$arDeal['ID']) {
+                        $arTasks[$arTask[$this->ufFields['TASK_SESSION']]][] = [
+                            'id' => $arTask['ID'],
+                            'completed' => !empty($arTask['CLOSED_DATE'])
+                        ];
+                        break;
+                    }
+                }
+            }
 
             for($i = 1; $i <= 6; $i++) {
                 if(!empty($arDeal[$this->ufFields['DEAL_PAY_SUM_'.$i]])) {
@@ -342,11 +441,36 @@ class CITrackCoursesAnalytics extends \CBitrixComponent implements Controllerabl
 
                         }
                     }
+
+                    $theoryCompleted = true;
+                    $practiceCompleted = true;
+
+                    foreach($this->arStagesRef as $arStage) {
+                        if($arStage['NAME'] == $i.' сессия') {
+                            foreach($arTasks[$arStage['STATUS_ID']] as $task) {
+                                if(!$task['completed']) {
+                                    $practiceCompleted = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if($arStage['NAME'] == 'ПВ-'.$i) {
+                            foreach($arTasks[$arStage['STATUS_ID']] as $task) {
+                                if(!$task['completed']) {
+                                    $theoryCompleted = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     $arPayments[] = [
                         "name" => "Оплата ".$i,
                         "sum" => $sum,
                         "paid" => $arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]],
-                        "payTill" => $date
+                        "payTill" => $date,
+                        "theoryCompleted" => $theoryCompleted,
+                        "practiceCompleted" => $practiceCompleted
                     ];
                     $fullPrice += $sum;
                     if($arDeal[$this->ufFields['DEAL_PAY_PAID_'.$i]]) {

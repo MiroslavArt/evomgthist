@@ -15,7 +15,9 @@ const App = function () {
         filter: {
             date: null,
             course: null,
-            categoryId: $('#filter').data('category')
+            group: null,
+            assigned: null,
+            categoryId: $('#ica__page').data('category')
         },
 
         initializators: {
@@ -27,8 +29,10 @@ const App = function () {
                     return;
                 }
 
-                postData.append('date', self.filter.date);
+                /*postData.append('date', self.filter.date);
                 postData.append('course', self.filter.course);
+                postData.append('group', self.filter.group);
+                postData.append('assigned', self.filter.assigned);*/
                 postData.append('categoryId', self.filter.categoryId);
                 postData.append('sessid', BX.message('bitrix_sessid'));
 
@@ -40,7 +44,7 @@ const App = function () {
                     self.renderCourses();
                 })
             },
-            initCourseList: function (self) {
+            /*initCourseList: function (self) {
                 fetch(self.endpoint + '&action=getCoursesList&sessid=' + BX.message('bitrix_sessid'))
                     .then(res => res.json())
                     .then(res => {
@@ -52,27 +56,41 @@ const App = function () {
             initDatepicker: function () {
                 $('.datepicker').datepicker({
                     format: 'yyyy-mm-dd',
-                    language: 'ru'
+                    language: 'ru',
+                    orientation: 'bottom'
                 });
             },
+            initGroupList: function (self) {
+                if($('#filter-group').length) {
+                    fetch(self.endpoint + '&action=getGroupList&sessid=' + BX.message('bitrix_sessid'))
+                        .then(res => res.json())
+                        .then(res => {
+                            res.data.forEach(group => {
+                                $('#filter-group').append(`<option value="${group.id}">${group.name}</option>`);
+                            });
+                        })
+                }
+            },*/
             initForm: function (self) {
-                $('#filter-date').change(function () {
-                    $(this).closest('form').submit();
-                });
+                BX.addCustomEvent('BX.Main.Filter:apply', BX.delegate(function (command, params) {
+                    this.initializators.initCourses(this);
+                    this.initializators.initPayments(this);
+                }, self));
+                        /*$('#filter-date, #filter-course, #filter-group, #filter-assigned-id').change(function () {
+                            $(this).closest('form').submit();
+                        });
 
-                $('#filter-course').change(function () {
-                    $(this).closest('form').submit();
-                });
+                        $('#filter').submit(function () {
+                            self.filter.date = $('#filter-date').val();
+                            self.filter.course = $('#filter-course').val();
+                            self.filter.group = $('#filter-group').val();
+                            self.filter.assigned = $('#filter-assigned-id').val();
 
-                $('#filter').submit(function () {
-                    self.filter.date = $('#filter-date').val();
-                    self.filter.course = $('#filter-course').val();
+                            self.initializators.initCourses(self);
+                            self.initializators.initPayments(self);
 
-                    self.initializators.initCourses(self);
-                    self.initializators.initPayments(self);
-
-                    return false;
-                });
+                            return false;
+                        });*/
             },
             initHandlers: function () {
                 $('body').on('show.bs.collapse', '.collapse', function () {
@@ -91,8 +109,8 @@ const App = function () {
                     return;
                 }
 
-                postData.append('date', self.filter.date);
-                postData.append('course', self.filter.course);
+                /*postData.append('date', self.filter.date);
+                postData.append('course', self.filter.course);*/
                 postData.append('categoryId', self.filter.categoryId);
                 postData.append('sessid', BX.message('bitrix_sessid'));
 
@@ -168,15 +186,34 @@ const App = function () {
 
                 let paymentDate = new Date(payment.payTill);
 
-                let divClass = 'default';
+                let halfSum = parseInt(payment.sum);
+                let listClassTheory = 'default';
+                let listClassPractice = 'default';
+                let html = `<ul class=list-group>`;
 
                 if (payment.paid) {
-                    divClass = 'success';
-                } else if (paymentDate < now) {
-                    divClass = 'danger';
+                    if(payment.theoryCompleted) {
+                        listClassTheory = 'success';
+                    } else {
+                        listClassTheory = 'info'
+                    }
+                    if(payment.practiceCompleted) {
+                        listClassPractice = 'success';
+                    } else {
+                        listClassPractice = 'info';
+                    }
+                }
+                 else if (paymentDate < now) {
+                    listClassTheory = 'danger';
+                    listClassPractice = 'danger';
                 }
 
-                return `<div class="payment-alert alert alert-${divClass}">${payment.sum.toLocaleString()}<br>${paymentDate.toLocaleDateString()}</div>`;
+                html += `<li class="list-group-item list-group-item-${listClassTheory}">${halfSum.toLocaleString()} ${paymentDate.toLocaleDateString()}</li>`;
+                html += `<li class="list-group-item list-group-item-${listClassPractice}">${halfSum.toLocaleString()} ${paymentDate.toLocaleDateString()}</li>`;
+
+                html += `</ul>`;
+
+                return html;
             },
             paymentsData: function (studentList, data) {
                 let html = '';
