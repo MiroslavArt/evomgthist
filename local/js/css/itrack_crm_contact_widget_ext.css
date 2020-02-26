@@ -1,0 +1,6 @@
+.itrack-crm-contact-widget-ext-block .crm-entity-widget-client-contact-item:after {
+    content: ', ';
+}
+.itrack-crm-contact-widget-ext-block .crm-entity-widget-client-contact-item:last-child:after {
+    content: '';
+}

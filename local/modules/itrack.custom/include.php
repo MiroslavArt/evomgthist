@@ -15,3 +15,9 @@
         'rel' => ['moment_timezone']
     ]
 );
+\CJSCore::RegisterExt('itrack_crm_contact_widget_ext',
+    [
+        'js' => '/local/js/itrack_crm_contact_widget_ext.js',
+        'css' => '/local/js/css/itrack_crm_contact_widget_ext.css'
+    ]
+);

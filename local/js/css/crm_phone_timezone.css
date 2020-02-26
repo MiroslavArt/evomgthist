@@ -1,7 +1,7 @@
 .itrack-custom-crm-phonetime__phone-block {
     position: absolute;
     right: 0;
-    bottom: 0;
+    top: 30px;
 }
 .itrack-custom-crm-phonetime__phone-block_text {
     font-weight: 600;

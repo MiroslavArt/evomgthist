@@ -545,19 +545,19 @@ class Webinar
                             ];
                             if(!$obDeal->Add($arDealFields, true, ['CURRENT_USER' => 53])) {
                                 self::log('error add deal '.print_r($arDealFields, true).': '.$obDeal->LAST_ERROR);
-                            } else {
-                                if(Loader::includeModule('bizproc')) {
-                                    // запустим бп на синхронизацию полей контакта со связанными сделками
-                                    $arErrorsTmp = [];
-                                    $wfId = \CBPDocument::StartWorkflow(
-                                        299,
-                                        array("crm", "CCrmDocumentContact", 'CONTACT_' . $contactId),
-                                        [],
-                                        $arErrorsTmp
-                                    );
-                                    if(!empty($arErrorsTmp)) {
-                                        self::log('error start bizproc on contact '.$contactId.': '.print_r($arErrorsTmp, true));
-                                    }
+                            }
+                            
+                            if(Loader::includeModule('bizproc')) {
+                                // запустим бп на синхронизацию полей контакта со связанными сделками
+                                $arErrorsTmp = [];
+                                $wfId = \CBPDocument::StartWorkflow(
+                                    299,
+                                    array("crm", "CCrmDocumentContact", 'CONTACT_' . $contactId),
+                                    [],
+                                    $arErrorsTmp
+                                );
+                                if(!empty($arErrorsTmp)) {
+                                    self::log('error start bizproc on contact '.$contactId.': '.print_r($arErrorsTmp, true));
                                 }
                             }
                         }

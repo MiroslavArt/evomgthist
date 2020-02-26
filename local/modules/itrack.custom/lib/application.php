@@ -12,11 +12,11 @@ class Application
 
     public static function init()
     {
-        self::initPhoneTimezones();
+        self::initJsHandlers();
         self::initEventHandlers();
     }
 
-    protected static function initPhoneTimezones()
+    protected static function initJsHandlers()
     {
         $urlTemplates = [
             'lead_detail' => ltrim(Option::get('crm', 'path_to_lead_details', '', SITE_ID), '/'),
@@ -56,6 +56,12 @@ class Application
             \CJSCore::init('crm_phone_timezone');
             $asset = Asset::getInstance();
             $asset->addString('<script>BX.ready(function () {BX.iTrack.Crm.PhoneTimezone.init("'.$type.'");});</script>');
+        }
+
+        if($page !== false && ($page === 'lead_detail' || $page === 'deal_detail')) {
+            \CJSCore::init('itrack_crm_contact_widget_ext');
+            $asset = Asset::getInstance();
+            $asset->addString('<script>BX.ready(function () {BX.iTrack.Crm.ContactWidgetExt.init();});</script>');
         }
     }
 
