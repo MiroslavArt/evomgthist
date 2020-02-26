@@ -439,7 +439,7 @@ class Webinar
                             if($viewStatus === 'F') {
                                 $arFields = ['STAGE_ID' => 'C50:WON'];
                             } else {
-                                $arFields = ['STAGE_ID' => 'C50:PREPARATION'];
+                                $arFields = ['STAGE_ID' => 'C50:LOSE'];
                             }
                             if (!$obDeal->Update($arDeal['ID'], $arFields, true, true, ['CURRENT_USER' => 53])) {
                                 self::log('error update deal ' . $arDeal['ID'] . ' stage: ' . $obDeal->LAST_ERROR . print_r($arFields, true));
@@ -528,7 +528,7 @@ class Webinar
                             if($viewStatus === 'F') {
                                 $stageID = 'C50:WON';
                             } elseif($viewStatus === 'E') {
-                                $stageID = 'C50:PREPARATION';
+                                $stageID = 'C50:LOSE';
                             }
                             $arIdPart = explode('*', $arWebinar['CODE']);
                             $parsedDate = \DateTime::createFromFormat('Y-m-d\TH:i:s', $arIdPart[1]);
