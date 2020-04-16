@@ -28,6 +28,7 @@ class Application
             'deal_kanban_category' => ltrim(Option::get('crm', 'path_to_deal_kanban', '', SITE_ID), '/').'category/#category_id#/',
             'contact_list' => ltrim(Option::get('crm', 'path_to_contact_list', '', SITE_ID), '/'),
             'company_list' => ltrim(Option::get('crm', 'path_to_company_list', '', SITE_ID), '/'),
+            'tasks_list' => ltrim(Option::get('tasks', 'paths_task_user', '', SITE_ID), '/'),
         ];
 
         $page = \CComponentEngine::parseComponentPath('/', $urlTemplates, $arVars);
@@ -62,6 +63,11 @@ class Application
             \CJSCore::init('itrack_crm_contact_widget_ext');
             $asset = Asset::getInstance();
             $asset->addString('<script>BX.ready(function () {BX.iTrack.Crm.ContactWidgetExt.init();});</script>');
+        }
+
+        if($page !== false && $page === 'tasks_list') {
+            // todo: add check if realy kanban page, see bitrix/components/bitrix/socialnetwork_user/templates/.default/user_tasks.php str 27
+            \CJSCore::init('itrack_crm_tasks_kanban_ext');
         }
     }
 

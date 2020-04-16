@@ -170,6 +170,10 @@ class Webinar
                     } catch(\Exception $e) {
 
                     }
+                    if(!empty($arWebinarData['roomid']) && strpos($arWebinarData['roomid'], 'module') !== false) {
+                        continue;
+                    }
+
                     // формируем имя как идентификатор комнаты без префикса с ид аккаунта + дата вебинара без времени
                     $name = '';
                     if(!empty($arWebinarData['group'])) {
@@ -372,8 +376,14 @@ class Webinar
     public static function processEnd($id)
     {
         if(Loader::includeModule('iblock') && Loader::includeModule('crm')) {
-            $db = \CIBlockElement::GetList([],['=ID' => $id], false, false, ['ID','IBLOCK_ID','NAME','CODE','PROPERTY_ROOM_ID','PROPERTY_DURATION']);
+            $db = \CIBlockElement::GetList([],['=ID' => $id, 'PROPERTY_COMPLETE' => false], false, false, ['ID','IBLOCK_ID','NAME','CODE','PROPERTY_ROOM_ID','PROPERTY_DURATION']);
             if($arWebinar = $db->Fetch()) {
+                \CIBlockElement::SetPropertyValuesEx(
+                    $arWebinar['ID'],
+                    $arWebinar['IBLOCK_ID'],
+                    ['COMPLETE' => 'P']
+                );
+
                 self::$token = Option::get('itrack.custom', 'bizon365_token', '');
                 self::$accountId = Option::get('itrack.custom', 'bizon365_id', '');
 
@@ -400,9 +410,11 @@ class Webinar
                         $timeViewed = (int)(floor((float)$viewer['viewTill']/1000) - floor((float)$viewer['view']/1000));
                         if($timeViewed > 0) {
                             if (!empty($arWebinar['PROPERTY_DURATION_VALUE'])) {
-                                if ((int)$timeViewed / ((int)$arWebinar['PROPERTY_DURATION_VALUE']) * 60 > 0.5) {
+                                $grade = (int)$timeViewed / ((int)$arWebinar['PROPERTY_DURATION_VALUE'] * 60);
+                                if ($grade > 0.5) {
                                     $viewStatus = 'F';
                                 } else {
+                                    print $grade;
                                     $viewStatus = 'E';
                                 }
                             } else {
@@ -416,7 +428,7 @@ class Webinar
                     $arDealFilter = [
                         //'CHECK_PERMISSIONS' => 'N',
                         'CATEGORY_ID' => 50,
-                        'STAGE_ID' => 'C50:NEW',
+                        //'STAGE_ID' => 'C50:NEW',
                         'UF_CRM_1582128672' => str_replace(self::$accountId.':','',$arWebinar['PROPERTY_ROOM_ID_VALUE']),
                         '>=UF_CRM_1582128645' => $parsedDate->format('d.m.Y').' 00:00:00',
                         '<UF_CRM_1582128645' => $parsedDate->format('d.m.Y').' 23:59:59'
@@ -434,7 +446,7 @@ class Webinar
                             ->exec();
                     }
                     if(isset($dbDeal) && $arDeal = $dbDeal->fetch()) {
-                        if($viewStatus !== 'N') {
+                        //if($viewStatus !== 'N') {
                             // если посмотрел больше 50% - двигаем сделку в успешные, если менее - в стадию посетил вебинар
                             if($viewStatus === 'F') {
                                 $arFields = ['STAGE_ID' => 'C50:WON'];
@@ -444,7 +456,7 @@ class Webinar
                             if (!$obDeal->Update($arDeal['ID'], $arFields, true, true, ['CURRENT_USER' => 53])) {
                                 self::log('error update deal ' . $arDeal['ID'] . ' stage: ' . $obDeal->LAST_ERROR . print_r($arFields, true));
                             }
-                        }
+                        //}
 
                         $dbContact = ContactTable::query()
                             ->setFilter(['ID' => $arDeal['CONTACT_ID']])
@@ -488,7 +500,10 @@ class Webinar
                                     $wfId = \CBPDocument::StartWorkflow(
                                         299,
                                         array("crm", "CCrmDocumentContact", 'CONTACT_' . $arContact['ID']),
-                                        [],
+                                        [
+                                            \CBPDocument::PARAM_TAGRET_USER => "user_53",
+                                            \CBPDocument::PARAM_DOCUMENT_EVENT_TYPE => \CBPDocumentEventType::Manual
+                                        ],
                                         $arErrorsTmp
                                     );
                                     if(!empty($arErrorsTmp)) {
@@ -498,18 +513,59 @@ class Webinar
                             }
                         }
                     } else {
-                        $dbContact = ContactTable::query()
-                            ->setFilter([['LOGIC' => 'OR', 'EMAIL' => $viewer['email'], 'PHONE' => $viewer['phone']]])
-                            ->setSelect(['ID'])
-                            ->exec();
-                        if($arContact = $dbContact->fetch()) {
+                        $arContactFilter = [];
+                        if(!empty($viewer['email'])) {
+                            $arContactFilter['EMAIL'] = $viewer['email'];
+                        }
+                        if(!empty($viewer['phone'])) {
+                            $arContactFilter['PHONE'] = $viewer['phone'];
+                        }
+                        if(!empty($arContactFilter)) {
+                            $arContactFilter['LOGIC'] = 'OR';
+                            $dbContact = ContactTable::query()
+                                ->setFilter([$arContactFilter])
+                                ->setSelect([
+                                    'ID',
+                                    'UF_CRM_1582202212', // посетил вебинар
+                                    'UF_CRM_1582222639', // посмотрел вебинар
+                                ])
+                                ->exec();
+                        }
+                        if(!empty($arContactFilter) && $arContact = $dbContact->fetch()) {
                             $contactId = $arContact['ID'];
+                            if($viewStatus !== 'N') {
+                                if ($viewStatus === 'F') {
+                                    $newLinks = $arContact['UF_CRM_1582222639'];
+                                } else {
+                                    $newLinks = $arContact['UF_CRM_1582202212'];
+                                }
+
+                                if (!empty($newLinks)) {
+                                    $newLinks[] = $arWebinar['ID'];
+                                    $newLinks = array_values(array_unique($newLinks));
+                                } else {
+                                    $newLinks = [$arWebinar['ID']];
+                                }
+                                if ($viewStatus === 'F') {
+                                    $arContactFields = ['UF_CRM_1582222639' => $newLinks];
+                                } else {
+                                    $arContactFields = ['UF_CRM_1582202212' => $newLinks];
+                                }
+
+                                if (!$obContact->Update($arContact['ID'], $arContactFields, true, true, ['CURRENT_USER' => 53])) {
+                                    self::log('error update contact ' . $arContact['ID'] . ' with webinar ' . $arWebinar['ID'] . ': ' . $obContact->LAST_ERROR . print_r($arContactFields, true));
+                                }
+                            }
                         } else {
                             $arFields = [
                                 'NAME' => $viewer['username'],
                                 'ASSIGNED_BY_ID' => 56,
-                                'PHONE' => ['VALUE' => $viewer['phone'], 'VALUE_TYPE' => 'WORK'],
-                                'EMAIL' => ['VALUE' => $viewer['email'], 'VALUE_TYPE' => 'WORK'],
+                                'HAS_EMAIL' => !empty($viewer['email']) ? 'Y' : 'N',
+                                'HAS_PHONE' => !empty($viewer['phone']) ? 'Y' : 'N',
+                                'FM' => [
+                                    'PHONE' => ['n0' => ['VALUE' => $viewer['phone'], 'VALUE_TYPE' => 'WORK']],
+                                    'EMAIL' => ['n0' => ['VALUE' => $viewer['email'], 'VALUE_TYPE' => 'WORK']],
+                                ],
                                 'COMMENTS' => 'Контакт с вебинара ' . $arWebinar['NAME']
                             ];
                             if ($viewStatus !== 'N') {
@@ -524,16 +580,16 @@ class Webinar
                         if(!$contactId) {
                             self::log('error create contact '.print_r($arFields, true).': '.$obContact->LAST_ERROR);
                         } else {
-                            $stageID = 'C50:NEW';
+                            //$stageID = 'C50:NEW';
                             if($viewStatus === 'F') {
                                 $stageID = 'C50:WON';
-                            } elseif($viewStatus === 'E') {
+                            } else {
                                 $stageID = 'C50:LOSE';
                             }
                             $arIdPart = explode('*', $arWebinar['CODE']);
                             $parsedDate = \DateTime::createFromFormat('Y-m-d\TH:i:s', $arIdPart[1]);
                             $arDealFields = [
-                                'TITLE' => $arWebinar['NAME'],
+                                'TITLE' => $arWebinar['NAME'].' '.$parsedDate->format('H:i'),
                                 'ASSIGNED_BY_ID' => 56,
                                 'CONTACT_ID' => $contactId,
                                 'CATEGORY_ID' => 50,
@@ -553,7 +609,10 @@ class Webinar
                                 $wfId = \CBPDocument::StartWorkflow(
                                     299,
                                     array("crm", "CCrmDocumentContact", 'CONTACT_' . $contactId),
-                                    [],
+                                    [
+                                        \CBPDocument::PARAM_TAGRET_USER => "user_53",
+                                        \CBPDocument::PARAM_DOCUMENT_EVENT_TYPE => \CBPDocumentEventType::Manual
+                                    ],
                                     $arErrorsTmp
                                 );
                                 if(!empty($arErrorsTmp)) {
@@ -611,5 +670,17 @@ class Webinar
     {
         // todo: better logging
         file_put_contents(__DIR__.'/log.log', date(DATE_COOKIE).': '.$msg.PHP_EOL, FILE_APPEND);
+
+        if(!function_exists('fne')) {
+            function fne($ar)
+            {
+                foreach ($ar as $value) {
+                    if (!empty($value)) {
+                        return $value;
+                    }
+                }
+                return '';
+            }
+        }
     }
 }

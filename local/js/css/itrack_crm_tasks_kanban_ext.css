@@ -1,0 +1,22 @@
+.itrack-custom-crm-taskskanban__additional-fields {
+    font-size: 14px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+.itrack-custom-crm-taskskanban__additional-fields__description {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+.tasks-kanban-item .tasks-kanban-item-deadline {
+    font-size: 14px;
+    font-weight: 700;
+}
+.tasks-kanban-item .tasks-kanban-item-tags,
+.tasks-kanban-item .tasks-kanban-item-timelogs,
+.tasks-kanban-item .tasks-kanban-item-control {
+    display: none!important;
+}
+.tasks-kanban-item .tasks-kanban-item-users div {
+    display: none!important
+}

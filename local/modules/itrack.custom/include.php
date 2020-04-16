@@ -21,3 +21,9 @@
         'css' => '/local/js/css/itrack_crm_contact_widget_ext.css'
     ]
 );
+\CJSCore::RegisterExt('itrack_crm_tasks_kanban_ext',
+    [
+        'js' => '/local/js/itrack_crm_tasks_kanban_ext.js',
+        'css' => '/local/js/css/itrack_crm_tasks_kanban_ext.css'
+    ]
+);

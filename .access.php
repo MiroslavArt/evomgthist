@@ -12,4 +12,5 @@ $PERM["pub"]["*"]="R";
 $PERM["pub"]["5"]="T_8";
 $PERM["online"]["*"]="R";
 $PERM["desktop_app"]["*"]="R";
+$PERM["dev.php"]["*"]="R";
 ?>

@@ -126,6 +126,7 @@ if ($GLOBALS["USER"]->IsAuthorized() && CModule::IncludeModule("socialnetwork"))
 				"counter_id" => "calendar",
 				"top_menu_id" => "top_menu_id_calendar",
 				"my_tools_section" => true,
+				"sub_link" => SITE_DIR."company/personal/user/".$userId."/calendar/?EVENT_ID=NEW",
 			),
 			""
 		);
@@ -404,6 +405,7 @@ if(\Bitrix\Main\Loader::includeModule('rpa') && \Bitrix\Rpa\Driver::getInstance(
 				"top_menu_id_rpa",
 				"/rpa/"
 			),
+			"counter_id" => "rpa_tasks",
 			"menu_item_id" => "menu_rpa",
 			"top_menu_id" => "top_menu_id_rpa",
 			"is_beta" => true,
@@ -500,20 +502,23 @@ $arMenuB24[] = array(
 	""
 );
 
-$arMenuB24[] = array(
-	GetMessage("TOP_MENU_ABOUT"),
-	SITE_DIR."about/",
-	array(SITE_DIR."about/"),
-	array(
-		"real_link" => getLeftMenuItemLink(
-			"top_menu_id_about",
-			SITE_DIR."about/"
+if (file_exists($_SERVER["DOCUMENT_ROOT"].SITE_DIR."about/"))
+{
+	$arMenuB24[] = array(
+		GetMessage("TOP_MENU_ABOUT"),
+		SITE_DIR."about/",
+		array(SITE_DIR."about/"),
+		array(
+			"real_link"    => getLeftMenuItemLink(
+				"top_menu_id_about",
+				SITE_DIR."about/"
+			),
+			"menu_item_id" => "menu_about_sect",
+			"top_menu_id"  => "top_menu_id_about"
 		),
-		"menu_item_id"=>"menu_about_sect",
-		"top_menu_id" => "top_menu_id_about"
-	),
-	""
-);
+		""
+	);
+}
 
 $arMenuB24[] = array(
 	GetMessage("TOP_MENU_MARKETPLACE"),
