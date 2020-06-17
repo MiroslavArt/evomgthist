@@ -1,0 +1,41 @@
+.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action {
+    display: none;
+}
+.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action[data-item-id='comment'],
+.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action[data-item-id='task'] {
+    display: block;
+}
+.crm-entity-section-tabs .crm-entity-section-tab {
+    display: none;
+}
+body.itrack-user .crm-entity-section-tabs .crm-entity-section-tab {
+    display: inline-block;
+}
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='main'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_deal'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_invoice'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_tree'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_event'] {
+    display: inline-block;
+}
+.enumeration-select .select2-container--default .select2-selection--single {
+    border-radius: 0;
+    border-color: #c4c7cc;
+    min-height: 39px;
+}
+
+.enumeration-select .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 39px;
+    color: #424956;
+}
+.enumeration-select .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 39px;
+}
+.bx-chrome .crm-kanban-item-fields-item-value {
+    max-height: 51px;
+    position: relative;
+}
+/** temp hide  */
+.crm-entity-widget-content-block-inner-pay-button {
+    display: none;
+}

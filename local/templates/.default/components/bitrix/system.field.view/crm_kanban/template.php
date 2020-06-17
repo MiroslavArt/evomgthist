@@ -10,13 +10,19 @@ $publicMode = isset($arParams["PUBLIC_MODE"]) && $arParams["PUBLIC_MODE"] === tr
             <?=GetMessage('CRM_ENTITY_TYPE_'.$entityType)?>:
             </td><?
         endif;*/
-        ?><td class="field_crm_entity"><?
-
+        ?><td class="field_crm_entity">
+        
+        <?
+        $links = '';
+        $fios = '';
         $first = true;
         $n = 1;
         foreach ($arEntity as $entityId => $entity)
         {
-            echo !$first ? ', ': '';
+            $links .= !$first ? ', ': '';
+            if(!empty($fios) && !$first) {
+                $fios .= ', ';
+            }
 
             if ($publicMode)
             {
@@ -34,17 +40,34 @@ $publicMode = isset($arParams["PUBLIC_MODE"]) && $arParams["PUBLIC_MODE"] === tr
                 {
                     $url = '/bitrix/components/bitrix/crm.'.$entityTypeLower.'.show/card.ajax.php';
                 }
-
-                ?><a href="<?=htmlspecialcharsbx($entity['ENTITY_LINK'])?>" target="_blank"
-                     bx-tooltip-user-id="<?=htmlspecialcharsbx($entityId)?>" bx-tooltip-loader="<?=htmlspecialcharsbx($url)?>" bx-tooltip-classname="crm_balloon<?=($entityType == 'LEAD' || $entityType == 'DEAL'? '_no_photo': '_'.$entityTypeLower)?>">
-                <?=GetMessage('CRM_ENTITY_TYPE_'.$entityType)?> <?if(count($arEntity) > 1):?><?=$n;?><?endif;?>
-                </a><?
+                $links .= '<a href="'.htmlspecialcharsbx($entity['ENTITY_LINK']).'" target="_blank" bx-tooltip-user-id="'
+                    .htmlspecialcharsbx($entityId).'" bx-tooltip-loader="'.htmlspecialcharsbx($url).'" bx-tooltip-classname="crm_balloon'
+                    .($entityType == 'LEAD' || $entityType == 'DEAL' ? '_no_photo': '_'.$entityTypeLower).'">'
+                    .GetMessage('CRM_ENTITY_TYPE_'.$entityType).' '.(count($arEntity) > 1 ? $n : '')
+                    .'</a>';
+                if(!empty($entity['CONTACT'])) {
+                    foreach($entity['CONTACT'] as $entityContact) {
+                        $tooltipUrl = '/bitrix/components/bitrix/crm.contact.show/card.ajax.php';
+                        $fios .= '<a href="'.htmlspecialcharsbx($entityContact['ENTITY_LINK']).'" target="_blank" bx-tooltip-user-id="'
+                            .htmlspecialcharsbx($entityContact['ID']).'" bx-tooltip-loader="'.htmlspecialcharsbx($tooltipUrl).'" bx-tooltip-classname="crm_balloon_contact">'
+                            .$entityContact['ENTITY_TITLE']
+                            .'</a>';
+                    }
+                } else {
+                    if (!empty($entity['FIO'])) {
+                        $fios .= $entity['FIO'];
+                    }
+                }
             }
             $n++;
             $first = false;
         };
-
-        ?></td>
+        ?>
+        <?if(!empty($fios)){?>
+            <div class="itrack-custom-crm-taskskanban__additional-fields-fio"><?=$fios;?></div>
+        <?}?>
+        <div><?=$links;?></div>
+        </td>
         </tr><?
     endforeach;
     ?></table>

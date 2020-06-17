@@ -45,12 +45,13 @@ class Tasks extends Controller
                 foreach($arUserFields as $arUserField) {
                     if($arUserField['FIELD_NAME'] === 'UF_CRM_TASK' && !empty($arUserField['VALUE'])) {
                         $html = '';
+                        unset($arUserField['USER_TYPE']['USE_FIELD_COMPONENT']);
                         ob_start();
                         global $APPLICATION;
                         $APPLICATION->IncludeComponent(
                             "bitrix:system.field.view",
                             'crm_kanban',
-                            array("arUserField" => $arUserField, 'PREFIX' => false),
+                            array("arUserField" => $arUserField, 'PREFIX' => false, 'skip_manager' => true),
                             null,
                             array("HIDE_ICONS"=>"Y")
                         );

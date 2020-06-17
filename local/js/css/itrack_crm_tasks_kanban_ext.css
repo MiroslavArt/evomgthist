@@ -8,6 +8,9 @@
     margin-bottom: 5px;
     font-size: 12px;
 }
+.itrack-custom-crm-taskskanban__additional-fields .itrack-custom-crm-taskskanban__additional-fields-fio {
+    font-weight: 400;
+}
 .tasks-kanban-item .tasks-kanban-item-deadline {
     font-size: 14px;
     font-weight: 700;

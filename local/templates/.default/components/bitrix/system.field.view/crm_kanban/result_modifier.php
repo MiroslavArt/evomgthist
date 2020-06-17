@@ -105,13 +105,36 @@ if (is_array($arResult['VALUE']) && count($arResult['VALUE']) > 0)
     if ($arParams['arUserField']['SETTINGS']['DEAL'] == 'Y'
         && isset($arValue['DEAL']) && !empty($arValue['DEAL']))
     {
-        $dbRes = CCrmDeal::GetListEx(array('TITLE'=>'ASC'), array('ID' => $arValue['DEAL']));
+        $dbRes = CCrmDeal::GetListEx(
+            array('TITLE'=>'ASC'),
+            array('ID' => $arValue['DEAL']),
+            false,
+            false,
+            ['ID','TITLE','UF_CRM_5D9A127974E9B','CONTACT_ID']
+        );
         while ($arRes = $dbRes->Fetch())
         {
             $arResult['VALUE']['DEAL'][$arRes['ID']] = Array(
+                'FIO' => $arRes['UF_CRM_5D9A127974E9B'],
                 'ENTITY_TITLE' => $arRes['TITLE'],
                 'ENTITY_LINK' => CComponentEngine::MakePathFromTemplate(COption::GetOptionString('crm', 'path_to_deal_show'), array('deal_id' => $arRes['ID']))
             );
+            if(!empty($arRes['CONTACT_ID'])) {
+                $dbContactRes = CCrmContact::GetListEx(
+                    array('LAST_NAME'=>'ASC', 'NAME' => 'ASC'),
+                    array('=ID' => $arRes['CONTACT_ID']),
+                    false,
+                    false,
+                    array('ID', 'FULL_NAME')
+                );
+                while ($arContactRes = $dbContactRes->Fetch()) {
+                    $arResult['VALUE']['DEAL'][$arRes['ID']]['CONTACT'][] = array(
+                        'ID' => $arContactRes['ID'],
+                        'ENTITY_TITLE' => $arContactRes['FULL_NAME'],
+                        'ENTITY_LINK' => CComponentEngine::MakePathFromTemplate(COption::GetOptionString('crm', 'path_to_contact_show'), array('contact_id' => $arContactRes['ID']))
+                    );
+                }
+            }
         }
     }
     if ($arParams['arUserField']['SETTINGS']['ORDER'] == 'Y'

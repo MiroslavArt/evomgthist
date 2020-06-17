@@ -5,33 +5,38 @@ BX.iTrack.Crm.Tasks.Kanban = {
     grid: null,
     processedItems: {},
     init: function() {
-        console.log('init');
-        BX.addCustomEvent('Kanban.Grid:onRender', BX.delegate(this.renderHandler, this));
-        BX.addCustomEvent('Kanban.Column:render', BX.delegate(this.columnRenderdHandler, this));
+        if(!!BX.Tasks && !!BX.Tasks.Kanban) {
+            BX.addCustomEvent('Kanban.Grid:onRender', BX.delegate(this.renderHandler, this));
+            BX.addCustomEvent('Kanban.Column:render', BX.delegate(this.columnRenderdHandler, this));
+        }
     },
     renderHandler: function(grid) {
         this.grid = grid;
     },
     columnRenderdHandler: function(column) {
-        this.grid = column.grid;
+        if(this.grid === null) {
+            this.grid = column.grid;
+        }
         var items = column.items;
         var itemsIDs = [];
         for(var i in items) {
-            if(items[i].data.hasOwnProperty('date_deadline')) {
-                var deadline = items[i].data.date_deadline;
-                if(parseInt(deadline) > 0) {
-                    var deadlineDate = new Date(parseInt(deadline) * 1000);
+            /*
+            if(items[i].data.hasOwnProperty('date_deadline') && items[i].data.date_deadline !== null) {
+                if(items[i].data.hasOwnProperty('date_deadline_parse')) {
                     if(items[i].date_deadline) {
+
                         var newVal = items[i].date_deadline.innerText;
                         if(newVal.indexOf(':') < 0) {
-                            var hours = ('0'+deadlineDate.getHours()).slice(-2);
-                            var minutes = ('0'+deadlineDate.getMinutes()).slice(-2);
-                            newVal = newVal + ' ' + hours + ':' + minutes;
+                            newVal = newVal + ' ' + items[i].data.date_deadline_parse.HH + ':' + items[i].data.date_deadline_parse.MI;
                             items[i].date_deadline.innerText = newVal;
                         }
+
+
                     }
+                } else {
+                    items[i].date_deadline.innerText = items[i].data.date_deadline;
                 }
-            }
+            }*/
 
             itemsIDs.push(items[i].id);
         }
@@ -67,6 +72,8 @@ BX.iTrack.Crm.Tasks.Kanban = {
                 }.bind(this), function(error){
 
                 });
+            } else {
+                this.renderAdditionalFields();
             }
         }
     },
@@ -89,26 +96,30 @@ BX.iTrack.Crm.Tasks.Kanban = {
         for(var i in this.processedItems) {
             if(this.grid.items[i]) {
                 if(this.processedItems[i].data.length) {
-                    if(!this.grid.items[i].task_content.querySelector('.itrack-custom-crm-taskskanban__additional-fields')) {
-                        var crmLink = BX.create('div', {
-                            attrs: {className: 'itrack-custom-crm-taskskanban__additional-fields'},
-                            html: this.processedItems[i].data
-                        });
-                        crmLink.querySelectorAll('a').forEach(function(node){
-                            BX.bind(node, 'click', BX.delegate(this.onCrmLinkClick, this));
-                        }.bind(this));
-                        BX.append(crmLink, this.grid.items[i].task_content);
+                    if(this.grid.items[i].task_content) {
+                        if (!this.grid.items[i].task_content.querySelector('.itrack-custom-crm-taskskanban__additional-fields')) {
+                            var crmLink = BX.create('div', {
+                                attrs: {className: 'itrack-custom-crm-taskskanban__additional-fields'},
+                                html: this.processedItems[i].data
+                            });
+                            crmLink.querySelectorAll('a').forEach(function (node) {
+                                BX.bind(node, 'click', BX.delegate(this.onCrmLinkClick, this));
+                            }.bind(this));
+                            BX.append(crmLink, this.grid.items[i].task_content);
+                        }
+                        this.grid.items[i].task_content.style.display = 'block';
                     }
-                    this.grid.items[i].task_content.style.display = 'block';
                 }
 
-                if(this.processedItems[i].description.length) {
-                    if(!this.grid.items[i].container.querySelector('.itrack-custom-crm-taskskanban__additional-fields__description')) {
-                        var descr = BX.create('div', {
-                            attrs: {className: 'itrack-custom-crm-taskskanban__additional-fields__description'},
-                            html: this.processedItems[i].description
-                        });
-                        BX.insertAfter(descr, this.grid.items[i].link);
+                if(this.grid.items[i].container) {
+                    if (this.processedItems[i].description.length) {
+                        if (!this.grid.items[i].container.querySelector('.itrack-custom-crm-taskskanban__additional-fields__description')) {
+                            var descr = BX.create('div', {
+                                attrs: {className: 'itrack-custom-crm-taskskanban__additional-fields__description'},
+                                html: this.processedItems[i].description
+                            });
+                            BX.insertAfter(descr, this.grid.items[i].link);
+                        }
                     }
                 }
             }

@@ -1,5 +1,7 @@
 <?php
-
+\CJSCore::RegisterExt('itrack_crm_styles_ext', [
+    'css' => '/local/js/css/itrack_crm_styles_ext.css'
+]);
 \CJSCore::RegisterExt('moment', [
    'js' => '/local/js/moment.min.js'
 ]);
@@ -25,5 +27,11 @@
     [
         'js' => '/local/js/itrack_crm_tasks_kanban_ext.js',
         'css' => '/local/js/css/itrack_crm_tasks_kanban_ext.css'
+    ]
+);
+\CJSCore::RegisterExt('itrack_crm_detail_editor_ext',
+    [
+        'js' => '/local/js/itrack_crm_detail_editor_ext.js'
+        //'css' => '/local/js/css/itrack_crm_detail_editor_ext.css'
     ]
 );
