@@ -54,6 +54,26 @@ $arAllOptions = [
                 $arIblocks
             ]
         ],
+    ],
+    'sendpulse' => [
+        [
+            'sendpulse_id',
+            Loc::getMessage($MODULE_ID.'_sendpulse_id'),
+            Option::get($MODULE_ID, 'sendpulse_id'),
+            ['text']
+        ],
+        [
+            'sendpulse_token',
+            Loc::getMessage($MODULE_ID.'_sendpulse_token'),
+            Option::get($MODULE_ID, 'sendpulse_token'),
+            ['text']
+        ],
+        [
+            'sendpulse_sync_books',
+            Loc::getMessage($MODULE_ID.'_sendpulse_sync_books'),
+            Option::get($MODULE_ID, 'sendpulse_sync_books'),
+            ['checkbox']
+        ]
     ]
 ];
 
@@ -67,15 +87,22 @@ if(isset($request["save"]) && check_bitrix_sessid()) {
     }
 }
 
-$arTabs = array(
-    array(
+$arTabs = [
+    [
         "DIV" => "bizon365",
         "TAB" => Loc::getMessage($MODULE_ID.'_bizon365_tab_title'),
         "ICON" => $MODULE_ID . '_settings',
         "TITLE" => Loc::getMessage($MODULE_ID.'_bizon365_tab_subtitle'),
         'TYPE' => 'options', //options || rights || user defined
-    )
-);
+    ],
+    [
+        "DIV" => "sendpulse",
+        "TAB" => Loc::getMessage($MODULE_ID.'_sendpulse_tab_title'),
+        "ICON" => $MODULE_ID . '_settings',
+        "TITLE" => Loc::getMessage($MODULE_ID.'_sendpulse_tab_subtitle'),
+        'TYPE' => 'options', //options || rights || user defined
+    ]
+];
 
 $tabControl = new CAdminTabControl("tabControl", $arTabs);
 
@@ -88,10 +115,9 @@ $tabControl->Begin();
     foreach ($arTabs as $tab) {
         $tabControl->BeginNextTab();
         __AdmSettingsDrawList($MODULE_ID, $arAllOptions[$tab['DIV']]);
-        $tabControl->Buttons();
-        ?>
-        <input type="submit" class="adm-btn-save" name="save" value="<?=Loc::getMessage($MODULE_ID.'_save');?>">
-        <?=bitrix_sessid_post();?>
-    <?}?>
+    }?>
+    <?$tabControl->Buttons();?>
+    <input type="submit" class="adm-btn-save" name="save" value="<?=Loc::getMessage($MODULE_ID.'_save');?>">
+    <?=bitrix_sessid_post();?>
     <? $tabControl->End(); ?>
 </form>

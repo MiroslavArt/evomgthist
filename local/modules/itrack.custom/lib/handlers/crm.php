@@ -4,11 +4,13 @@ namespace iTrack\Custom\Handlers;
 
 use Bitrix\Crm\DealTable;
 use Bitrix\Main\Loader;
+use iTrack\Custom\Integration\CrmManager;
 
 class Crm
 {
     private static $oldAssignedId;
     private static $isFinalStage = false;
+    private static $oldFields = [];
     private static $ufWEbinarViewedCountData = [];
 
     public static function onBeforeCrmDealUpdate(&$arFields)
@@ -18,6 +20,7 @@ class Crm
             ->setSelect(['ID','ASSIGNED_BY_ID','STAGE_ID'])
             ->exec();
         $arDeal = $rsDeal->fetch();
+        self::$oldFields = $arDeal;
         if(\CCrmDeal::GetSemanticID($arDeal['STAGE_ID']) == \Bitrix\Crm\PhaseSemantics::FAILURE
             || \CCrmDeal::GetSemanticID($arDeal['STAGE_ID']) == \Bitrix\Crm\PhaseSemantics::SUCCESS) {
             self::$isFinalStage = true;
@@ -29,6 +32,11 @@ class Crm
 
     public static function onAfterCrmDealUpdate(&$arFields)
     {
+        if(!empty(self::$oldFields)) {
+            $arFields['C_OLD_FIELDS'] = self::$oldFields;
+            self::$oldFields = [];
+        }
+
         if(!empty($arFields['ASSIGNED_BY_ID']) && !empty(self::$oldAssignedId) && (int)$arFields['ASSIGNED_BY_ID'] !== self::$oldAssignedId && !self::$isFinalStage) {
             Loader::includeModule('tasks');
 
@@ -55,13 +63,15 @@ class Crm
 
             $task = new \Bitrix\Tasks\Item\Task(0, 1);
             $deadline = new \Bitrix\Main\Type\DateTime();
-            $deadline->add('1 day');
+            $deadline->add('5 hours');
             $task['TITLE'] = 'Вас назначили ответственным за сделку. Свяжитесь с клиентом!';
             $task['DESCRIPTION'] = 'Вас назначили ответственным за сделку. Свяжитесь с клиентом!';
             $task['RESPONSIBLE_ID'] = $arFields['ASSIGNED_BY_ID'];
             $task['UF_CRM_TASK'] = ['D_'.$arFields['ID']];
             $task['DEADLINE'] = $deadline;
             $task->save();
+
+            self::$oldAssignedId = null;
         }
 
         $dbDeal = DealTable::query()
@@ -101,11 +111,14 @@ class Crm
                 $enumId = self::$ufWEbinarViewedCountData['VALUES'][$newCount];
                 if(!empty($enumId)) {
                     $obDeal = new \CCrmDeal(false);
-                    $arFields = ['UF_CRM_1591020493' => $enumId];
-                    $obDeal->Update($arDeal['ID'], $arFields);
+                    $arUpdateFields = ['UF_CRM_1591020493' => $enumId];
+                    $arFields['C_OLD_FIELDS']['UF_CRM_1591020493'] = $arDeal['UF_CRM_1582269904'];
+                    $obDeal->Update($arDeal['ID'], $arUpdateFields);
                 }
             }
         }
+
+        CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_UPDATE);
     }
 
     protected static function getWebinarViewedCountUFValues()
@@ -117,5 +130,10 @@ class Crm
             $arValuesRef[$arEnum['ID']] = $arEnum['VALUE'];
         }
         self::$ufWEbinarViewedCountData = ['VALUES' => $arValues, 'VALUES_REF' => $arValuesRef];
+    }
+
+    public static function onAfterCrmDealAdd(&$arFields)
+    {
+        CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_CREATE);
     }
 }

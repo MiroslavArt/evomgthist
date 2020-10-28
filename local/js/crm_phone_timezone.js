@@ -1,4 +1,3 @@
-
 BX.namespace('iTrack.Crm.PhoneTimezone');
 
 BX.iTrack.Crm.PhoneTimezone = {
@@ -27,12 +26,14 @@ BX.iTrack.Crm.PhoneTimezone = {
         var collectPhones = [];
         for(var i in grid.items) {
             if(grid.items[i].data.hasOwnProperty('phone')) {
-                if (grid.items[i].data.phone.length) {
-                    var localValue = localStorage.getItem(grid.items[i].data.phone[0].value);
-                    if (localValue == null) {
-                        collectPhones.push(grid.items[i].data.phone[0].value);
-                    }
-                }
+				if(grid.items[i].data.phone.hasOwnProperty('contact')) {
+					if (grid.items[i].data.phone.contact.length) {
+						var localValue = localStorage.getItem(grid.items[i].data.phone.contact[0].value);
+						if (localValue == null) {
+							collectPhones.push(grid.items[i].data.phone.contact[0].value);
+						}
+					}
+				}
             }
         }
         if(collectPhones.length) {
@@ -51,16 +52,18 @@ BX.iTrack.Crm.PhoneTimezone = {
         var items = this.kanban.items;
         for(var i in items) {
             if(items[i].data.hasOwnProperty('phone')) {
-                if (items[i].data.phone.length) {
-                    var localValue = localStorage.getItem(items[i].data.phone[0].value);
-                    if (localValue !== null) {
-                        if (!items[i].contactBlock.querySelector('.itrack-custom-crm-phonetime__phone-block')) {
-                            var timeNode = this.createTimeNodeForContactBlock();
-                            BX.append(timeNode, items[i].contactBlock);
-                            new BX.iTrack.Crm.PhoneTimezone.Timer(localValue, timeNode);
-                        }
-                    }
-                }
+				if(items[i].data.phone.hasOwnProperty('contact')) {
+					if (items[i].data.phone.contact.length) {
+						var localValue = localStorage.getItem(items[i].data.phone.contact[0].value);
+						if (localValue !== null) {
+							if (!items[i].contactBlock.querySelector('.itrack-custom-crm-phonetime__phone-block')) {
+								var timeNode = this.createTimeNodeForContactBlock();
+								BX.append(timeNode, items[i].contactBlock);
+								new BX.iTrack.Crm.PhoneTimezone.Timer(localValue, timeNode);
+							}
+						}
+					}
+				}
             }
         }
     },

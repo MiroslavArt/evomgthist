@@ -446,18 +446,6 @@ class Webinar
                             ->exec();
                     }
                     if(isset($dbDeal) && $arDeal = $dbDeal->fetch()) {
-                        //if($viewStatus !== 'N') {
-                            // если посмотрел больше 50% - двигаем сделку в успешные, если менее - в стадию посетил вебинар
-                            if($viewStatus === 'F') {
-                                $arFields = ['STAGE_ID' => 'C50:WON'];
-                            } else {
-                                $arFields = ['STAGE_ID' => 'C50:LOSE'];
-                            }
-                            if (!$obDeal->Update($arDeal['ID'], $arFields, true, true, ['CURRENT_USER' => 53])) {
-                                self::log('error update deal ' . $arDeal['ID'] . ' stage: ' . $obDeal->LAST_ERROR . print_r($arFields, true));
-                            }
-                        //}
-
                         $dbContact = ContactTable::query()
                             ->setFilter(['ID' => $arDeal['CONTACT_ID']])
                             ->setSelect([
@@ -493,23 +481,35 @@ class Webinar
                                 if (!$obContact->Update($arContact['ID'], $arContactFields, true, true,['CURRENT_USER' => 53])) {
                                     self::log('error update contact ' . $arContact['ID'] . ' with webinar ' . $arWebinar['ID'] . ': ' . $obContact->LAST_ERROR . print_r($arContactFields, true));
                                 }
+                            }
+                        }
 
-                                if(Loader::includeModule('bizproc')) {
-                                    // запустим бп на синхронизацию полей контакта со связанными сделками
-                                    $arErrorsTmp = [];
-                                    $wfId = \CBPDocument::StartWorkflow(
-                                        299,
-                                        array("crm", "CCrmDocumentContact", 'CONTACT_' . $arContact['ID']),
-                                        [
-                                            \CBPDocument::PARAM_TAGRET_USER => "user_53",
-                                            \CBPDocument::PARAM_DOCUMENT_EVENT_TYPE => \CBPDocumentEventType::Manual
-                                        ],
-                                        $arErrorsTmp
-                                    );
-                                    if(!empty($arErrorsTmp)) {
-                                        self::log('error start bizproc on contact '.$arContact['ID'].': '.print_r($arErrorsTmp, true));
-                                    }
-                                }
+                        //if($viewStatus !== 'N') {
+                        // если посмотрел больше 50% - двигаем сделку в успешные, если менее - в стадию посетил вебинар
+                        if($viewStatus === 'F') {
+                            $arFields = ['STAGE_ID' => 'C50:WON'];
+                        } else {
+                            $arFields = ['STAGE_ID' => 'C50:LOSE'];
+                        }
+                        if (!$obDeal->Update($arDeal['ID'], $arFields, true, true, ['CURRENT_USER' => 53])) {
+                            self::log('error update deal ' . $arDeal['ID'] . ' stage: ' . $obDeal->LAST_ERROR . print_r($arFields, true));
+                        }
+                        //}
+
+                        if($arContact && Loader::includeModule('bizproc')) {
+                            // запустим бп на синхронизацию полей контакта со связанными сделками
+                            $arErrorsTmp = [];
+                            $wfId = \CBPDocument::StartWorkflow(
+                                299,
+                                array("crm", "CCrmDocumentContact", 'CONTACT_' . $arContact['ID']),
+                                [
+                                    \CBPDocument::PARAM_TAGRET_USER => "user_53",
+                                    \CBPDocument::PARAM_DOCUMENT_EVENT_TYPE => \CBPDocumentEventType::Manual
+                                ],
+                                $arErrorsTmp
+                            );
+                            if(!empty($arErrorsTmp)) {
+                                self::log('error start bizproc on contact '.$arContact['ID'].': '.print_r($arErrorsTmp, true));
                             }
                         }
                     } else {
