@@ -30,6 +30,55 @@ class Crm
         }
     }
 
+	public static function funcTimelineOnAfterAdd()
+	{
+		$strMsg = '';
+		$application = \Bitrix\Main\Application::getInstance();
+		$request = $application->getContext()->getRequest();
+		$dealID = $request->getPost('OWNER_ID');
+		$ownerTypeID = $request->getPost('OWNER_TYPE_ID'); ///CCrmOwnerType::Deal=2
+		$action = $request->getPost('ACTION');
+		if ($action == "SAVE_COMMENT" and (int)($ownerTypeID) == 2) { //[OWNER_TYPE_ID] => 2
+			$strMsg = $request->getPost('TEXT');
+		}
+		if (!empty($strMsg)) {
+            //\Bitrix\Main\Loader::includeModule("crm");
+			$currentDbResult = \CCrmDeal::GetList(
+				[],
+				['=ID' => $ID = $dealID, 'CHECK_PERMISSIONS' => 'N'],
+				['CONTACT_ID'],
+				false,
+				);
+			$contactId = $currentDbResult->Fetch()['CONTACT_ID'];
+			
+			if(false) {
+            //				ini_set('zend_extension','');
+            //				ini_set('xdebug.remote_enable', '0');
+            //				ini_set('remote_autostart', '0');
+            //				ini_set('xdebug.profiler_enable','0');
+            //			Fatal error: Maximum function nesting level of '256' reached
+				
+				$entity = new \Bitrix\Crm\Timeline\CommentEntry(false);
+				$ret = $entity->create(
+					array(
+						'TEXT' => 'test text in timeline',
+					'TYPE_ID' => TimelineType::COMMENT,
+						'TYPE_CATEGORY_ID' => 0,
+						'CREATED' => $created = new \Bitrix\Main\Type\DateTime(),
+					'AUTHOR_ID' => \CCrmSecurityHelper::GetCurrentUserID(),
+						'COMMENT' => $strMsg,
+						'BINDINGS' => [[
+							'ENTITY_TYPE_ID' => 3 //CCrmOwnerType::Contact
+							, 'ENTITY_ID' => $contactId
+						]],
+            //					'SETTINGS' => $settings=array('HAS_FILES' => 'N'),
+					));
+			}
+
+		}
+	}
+    
+    
     public static function onAfterCrmDealUpdate(&$arFields)
     {
         if(!empty(self::$oldFields)) {
