@@ -37,7 +37,7 @@ class Application
         $eventManager->addEventHandler('main','OnProlog', ['\iTrack\Custom\Handlers\Main','onProlog']);
         $eventManager->addEventHandler('main','OnEpilog', ['\iTrack\Custom\Handlers\Main','onEpilog']);
         $eventManager->addEventHandler('im','OnBeforeMessageNotifyAdd', ['\iTrack\Custom\Handlers\Im','onBeforeMessageNotifyAdd']);
-        $eventManager->addEventHandler("crm", "\Bitrix\Crm\Timeline\Entity\Timeline::OnAfterAdd", ['\iTrack\Custom\Handlers\Crm','funcTimelineOnAfterAdd']);
+        $eventManager->addEventHandler("crm", "OnAfterCrmTimelineCommentAdd", ['\iTrack\Custom\Handlers\Crm','funcOnAfterCrmTimelineCommentAdd']);
 
     }
 
