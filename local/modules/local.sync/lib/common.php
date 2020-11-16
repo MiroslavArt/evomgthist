@@ -2,7 +2,8 @@
 
 namespace Local\Sync;
 
-use Bitrix\Main\Config\Option;
+use Bitrix\Main\Config\Option
+	, Bitrix\Main\Loader;
 
 /*
 1.0. Отменён	
@@ -33,8 +34,111 @@ use Bitrix\Main\Config\Option;
 0.1. Неизвестный статус	
 */
 
+
+class CustomRandom
+{
+	public $lsDealStatus = [];
+	public $arDealsWithState;
+	public $propertyByValueOrder;
+
+	function __construct($lsDealStatus = [], $arDealsWithState = [], $propertyByValueOrder = '')
+	{
+		$this->lsDealStatus = $lsDealStatus;
+		$this->arDealsWithState = $arDealsWithState;
+		$this->propertyByValueOrder = $propertyByValueOrder;
+	}
+
+	function updatefuncByLoop()
+	{
+		// print_r($this->arDealsWithState);
+
+		foreach ($this->arDealsWithState as $vID) {
+			$this->execfunc($vID['ID'], $vID['STAGE_ID']);
+		}
+
+
+	}
+
+	function execfunc($strID = '', $currentStage)
+	{
+		if (empty($strID) || empty($currentStage)) {
+			return;
+		}
+		/*
+			[parameter] => Array
+				(
+					[$lsDealStatus] => <optional>
+					[$searchval] => <optional>
+				)
+
+
+		(
+			[num] => 1
+			[stage] => Array
+				(
+					[0] => empty
+					[1] => C7:NEW
+					[2] => C7:EXECUTING
+					[3] => C7:FINAL_INVOICE
+					[4] => C7:2
+					[5] => C7:3
+					[6] => C7:WON
+					[7] => C7:LOSE
+					[8] => C7:APOLOGY
+				)
+
+			[now] => C7:NEW
+		)
+		*/
+		$arfindByKey = function ($lsDealStatus = [], $searchval = '') {
+			$ret = [];
+			array_walk($lsDealStatus, function ($v, $k) use ($lsDealStatus, &$ret, $searchval) {
+				$arks = array_keys($v);
+				$searchkey = array_search($searchval, $arks);
+				if ($searchkey) {
+					$ret = ['num' => $searchkey, 'stage' => $arks, 'now' => $arks[$searchkey]];
+				}
+			});
+			return $ret;
+
+		};
+		$arfindByKey = $arfindByKey($this->lsDealStatus, $currentStage);
+
+		$fChangeState = function ($arIncomingState = [], $nowState = '') {
+
+			$_c = count($arIncomingState);
+			$_set = rand(1, $_c - 1);
+			if (!empty($arIncomingState[$_set])) {
+				return $arIncomingState[$_set];
+			}
+			return $nowState;
+		};
+
+		$arUpdate['STAGE_ID'] = $fChangeState($arfindByKey['stage'], $currentStage);
+
+		$obDeal = new \CCrmDeal(false);
+		if (!$obDeal->Update($strID, $arUpdate)) {
+			// print_r($obDeal->LAST_ERROR);
+			// $this->WriteToTrackingService('Ошибка обновления сделки : '.$obDeal->LAST_ERROR);
+		} else {
+			// print_r($arUpdate);
+			// $this->WriteToTrackingService('Cделка обновлена. Поля: '.print_r($arUpdate, true));
+		}
+
+	}
+
+}
+
+
 class Common
 {
+	public static $propByOffer = '_';
+
+	public function __construct()
+	{
+
+	}
+
 	public static function InvoiceSyncCreate($arFields)
 	{
 		$ID = $arFields["ID"];
@@ -100,15 +204,6 @@ class Common
 		return true;
 	}
 
-	public static function getDefine()
-	{
-		$arr = [
-			'ID_MODULE' => 'local.sync'
-		];
-
-		return $arr;
-	}
-
 	public static function getOption()
 	{
 
@@ -126,6 +221,14 @@ class Common
 
 	}
 
+	public static function getDefine()
+	{
+		$arr = [
+			'ID_MODULE' => 'local.sync'
+		];
+
+		return $arr;
+	}
 
 	public static function syncHoockInvoice($status = 1, $rev = 0)
 	{// Status 0 - не оплачен, 1 - оплачен, 2 - частично оплачен, 3 - отклонен
@@ -209,9 +312,68 @@ class Common
 
 	public static function syncHoockDeals()
 	{
+		$lsDealStatus = self::getListStatusDealsCategory();
+		self::$propByOffer = \Bitrix\Main\Config\Option::get(self::getDefine()['ID_MODULE'], "property_deals_sfID");
+		$arrayIDDeals = self::getListDeals(self::$propByOffer);
+		$ret = new CustomRandom($lsDealStatus, $arrayIDDeals, self::$propByOffer);
+		$ret = $ret->updatefuncByLoop();
 
 
 	}
+
+	public static function getListStatusDealsCategory()
+	{
+		$lsDealStatus = [];
+		$sSql = "SELECT
+		   ID,
+		   -- CREATED_DATE,
+		   NAME
+		   -- IS_LOCKED,
+		   -- SORT
+		FROM b_crm_deal_category
+		  WHERE IS_LOCKED='N'";
+		$connection = \Bitrix\Main\Application::getConnection();
+		$dealCatIterator = $connection->query($sSql);
+		$ardealCat = array();
+		while ($siblingsElement = $dealCatIterator->fetch()) {
+			$ardealCat[$siblingsElement['ID']] = $siblingsElement['NAME'];
+		}
+
+		foreach (array_keys($ardealCat) as $valdealCat) {
+			$numgID = $valdealCat;
+			$sgID = $numgID > 0 ? "DEAL_STAGE_$numgID" : "DEAL_STAGE";
+			$arDealStatus = \CCrmStatus::GetStatusList($sgID);
+
+			$lsDealStatus[$numgID]['empty'] = '--';
+			foreach ($arDealStatus as $dealKey => $arItem) {
+				$lsDealStatus[$numgID][$dealKey] = $arItem;
+			}
+		}
+		return $lsDealStatus;
+
+	}
+
+	public static function getListDeals($sPropSF)
+	{
+
+
+		$arrayIDDeals = [];
+		$obDealList = \CCrmDeal::GetList(
+			array()
+			, ["!$sPropSF" => ""]
+			, $arSelect = ['ID', 'STAGE_ID', 'TITLE', 'COMPANY_ID', 'CONTACT_FULL_NAME', 'OPPORTUNITY', 'CURRENCY_ID', $sPropSF]
+		);
+		while ($odeal = $obDealList->Fetch()) {
+			if (is_numeric($odeal[$sPropSF])) {
+				$arrayIDDeals[] = $odeal;
+			}
+
+		}
+
+		return $arrayIDDeals;
+
+	}
+
 
 }
 
