@@ -39,7 +39,7 @@ function funcOnAfterCrmTimelineCommentAdd($ID)
 			)
 		);
 		$strIdDeal = $checkData->fetch()['CRM_TIMELINE_ENTITY_TIMELINE_BINDING_ENTITY_ID'];
-		// Bitrix\Crm\Timeline\CommentEntry::registerBindings($ID, $bindings);
+		// Bitrix\Crm\Timeline\CommentEntry::registerBindings($ID, $fields); // $ID(TimelineTable.OWNER_ID)
 		if (!empty($strIdDeal)) {
 			$currentDbResult = \CCrmDeal::GetList(
 				[],
