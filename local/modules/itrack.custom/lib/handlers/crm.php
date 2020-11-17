@@ -201,4 +201,102 @@ class Crm
     {
         CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_CREATE);
     }
+    
+    public static function fOnAfterCrmDealAdd($fields){
+        /*
+            do not use any throw Except in this time
+        
+            warning !!  $arOptions['CURRENT_USER']=3	VS	SUser->GetID
+        
+            warning !! $ufDolvnostKompanii, $ufSsilkaNaResume must be exist!!!
+        */
+        $ufDolvnostKompanii='UF_CRM_1605532823'; // 'POST';
+        $ufSsilkaNaResume='UF_CRM_1605542456'; //
+        
+
+        if (!empty($fields['COMMENTS']))
+        {
+            $incoming=$fields['COMMENTS'];
+            $sUlResume=function($str){
+                $retUrl='';
+                if(preg_match("|<a.*(?=href=\"([^\"]*)\")[^>]*>([^<]*)</a>|i", $str, $matches)){
+                    $retUrl=$matches[1];
+                    }
+                return $retUrl;
+                };
+            $sUlphoto=function($str){
+                $retUrl='';
+                if(preg_match("|<img.*(?=src=\"([^\"]*)\")[^>]*>([^<]*)|i", $str, $matches)){
+                    $retUrl=$matches[1];
+                    }
+                return $retUrl;
+                };
+                
+            $sVakancy=function($str){
+                $retUrl='';
+                $ret=explode('<br>Вакансия:',$str)[1];
+                $ret=explode('<br>',$ret)[0];
+                $ret=is_array($ret)?'':trim($ret);
+                return $ret;
+                };
+                
+            $strVakancy=!empty($sVakancy($incoming))?$sVakancy($incoming):$fields["SOURCE_DESCRIPTION"];	
+            $strUlphoto=$sUlphoto($incoming);	
+            $strUlResume=$sUlResume($incoming);
+            $arFields=[];
+            
+            if (\Bitrix\Main\Loader::includeModule('wiki')&&\Bitrix\Main\Loader::includeModule('crm')&&!empty($fields['CONTACT_ID']))
+            {
+                $strUlphoto=CWikiUtils::htmlspecialchars_decode($strUlphoto);
+                $sContactId=$fields['CONTACT_ID'];
+                $sDealId=$fields['ID'];
+                /*
+                future use
+                $fields['PHOTO']="/abcdef.jpg";
+                $afile=\Bitrix\Main\Application::getDocumentRoot().$fields['PHOTO'];
+                if (\Bitrix\Main\IO\File::isFileExists($afile))
+                {
+                    $arFields['PHOTO'] = $afile;
+                }
+                */
+                if ($boolAttachPhoto)
+                {
+                    $arFields['PHOTO'] = $arFields['PHOTO']? \CFile::MakeFileArray($strUlphoto): '';
+                }
+                $arFields[$ufDolvnostKompanii]=$strVakancy;
+                $arFields[$ufSsilkaNaResume]=$strUlResume;
+                
+                $CCrmEntity = new CCrmDeal(false);
+
+                $res = $CCrmEntity->Update(
+                        $sDealId
+                        , $arFields
+                        ,true,true,$arOptions['CURRENT_USER']=3
+                    );
+                        if (!$res)
+                            // throw new Exception($CCrmEntity->LAST_ERROR);
+                            $obj_log_error=($CCrmEntity->LAST_ERROR);			
+                // var_dump($res);
+                // print_r($sDealId."\n");
+                // print_r($arFields);
+                /*
+                Array
+                (
+                    [PHOTO] => 154449
+                    [POST] => ownership
+                    [~DATE_MODIFY] => now()
+                    [MODIFY_BY_ID] => 0
+                    [FULL_NAME] => Морозова Ольга
+                    [ID] => 4940
+                )		
+                            */
+                
+                
+            }
+
+
+                
+        }
+    }
+
 }
