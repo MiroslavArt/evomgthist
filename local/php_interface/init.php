@@ -73,6 +73,7 @@ function funcOnAfterCrmTimelineCommentAdd($ID)
 // $eventManager->addEventHandler("crm", "OnAfterCrmTimelineCommentAdd", funcOnAfterCrmTimelineCommentAdd);
 AddEventHandler("crm", "OnAfterCrmTimelineCommentAdd", "funcOnAfterCrmTimelineCommentAdd");
 
+AddEventHandler("crm", "OnAfterCrmDealAdd", "fOnAfterCrmDealAdd");
 
 if(Bitrix\Main\Loader::includeModule('itrack.custom')) {
     \iTrack\Custom\Application::init();
