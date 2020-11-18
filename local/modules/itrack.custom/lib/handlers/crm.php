@@ -308,20 +308,25 @@ class Crm
                                 ? True
                                 : False
                         );	
-                $storage = \Bitrix\Disk\Driver::getInstance()->getStorageByUserId($sDiskStorageUser); 
-                if ($storage&&$isDiskEnabled) 
+                // $storage = \Bitrix\Disk\Driver::getInstance()->getStorageByUserId($sDiskStorageUser);
+               
+                if ($isDiskEnabled) 
                 { 
-                    $folder = $storage->getChild( 
-                        array( 
-                            '=NAME' => $sDiskFolderName,  
-                            'TYPE' => \Bitrix\Disk\Internals\FolderTable::TYPE_FOLDER 
-                        ) 
-                    ); 
+                    $storageID = \Bitrix\Disk\BaseObject::getList(array(
+                                'select' => array("*"),
+                                'filter' => $filter=['=NAME'=> 'HRManagement'],  
+                            ))->Fetch()['ID'];
+                    $folder=Bitrix\Disk\BaseObject::loadById($storageID,['STORAGE']);
                     if (empty($folder))
                     {
                         $folder = $storage->getRootObject(); 
                     }
+
                     $fileArray = \CFile::MakeFileArray($strUlphoto); 
+
+                    $file =$folder->uploadFile($fileArray, array(  
+                                        'CREATED_BY' => $sDiskStorageUser  
+                                    )); 
                     /*
                     
                     warning !!   hh.ru can set state 403 
@@ -340,9 +345,6 @@ class Crm
 
                     */
 
-                    $file = $folder->uploadFile($fileArray, array(  
-                        'CREATED_BY' => $sDiskStorageUser  
-                    ));
                     if (empty($file))
                     {
                         $file = $folder->getChild([
