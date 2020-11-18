@@ -210,13 +210,14 @@ class Crm
         
             warning !! $ufDolvnostKompanii, $ufSsilkaNaResume must be exist!!!
         */
-        $ufDolvnostKompanii='UF_CRM_1605532823'; // 'POST';
-        $ufSsilkaNaResume='UF_CRM_1605542456'; //
+        $ufDolvnostKompanii='UF_CRM_1605532823';//'UF_CRM_1605690367';//'UF_CRM_1605532823'; // 'POST';
+        $ufSsilkaNaResume='UF_CRM_1605542456';//'UF_CRM_1605690484';//'UF_CRM_1605542456'; //
         $sDiskStorageUser=1;
         $sDiskFolderName='Файлы приложений';
+        $sCategoryDealID=63; //60
         
 
-        if (!empty($fields['COMMENTS']))
+        if (!empty($fields['COMMENTS']) and $fields["CATEGORY_ID"]==$sCategoryDealID)
         {
             $incoming=$fields['COMMENTS'];
             $sUlResume=function($str){
@@ -272,13 +273,14 @@ class Crm
                 
                 $arFields[$ufDolvnostKompanii]=$strVakancy;
                 $arFields[$ufSsilkaNaResume]=$strUlResume;
+                $arFields['TITLE']=$strVakancy;
                 
                 $CCrmEntity = new CCrmDeal(false);
 
                 $res = $CCrmEntity->Update(
                         $sDealId
                         , $arFields
-                        ,true,true,$arOptions['CURRENT_USER']=3
+                        ,true,true,$arOptions['CURRENT_USER']=$sDiskStorageUser
                     );
                         if (!$res)
                             // throw new Exception($CCrmEntity->LAST_ERROR);
@@ -361,7 +363,7 @@ class Crm
                     
                     $entryID = Bitrix\Crm\Timeline\CommentEntry::create(
                         array(
-                            'TEXT' => $strMsg = $strVakancy." \n ".$strUlResume,
+                            'TEXT' => $strMsg = "\n",//$strVakancy." \n ".$strUlResume,
                             'SETTINGS' => ['HAS_FILES' => 'Y'],
                             'AUTHOR_ID' => $sDiskStorageUser,//global$USER->GetID(),
                             'BINDINGS' => [[
@@ -390,6 +392,6 @@ class Crm
 
                 
         }
-    }
+}
 
 }
