@@ -212,6 +212,8 @@ class Crm
         */
         $ufDolvnostKompanii='UF_CRM_1605532823'; // 'POST';
         $ufSsilkaNaResume='UF_CRM_1605542456'; //
+        $sDiskStorageUser=1;
+        $sDiskFolderName='Файлы приложений';
         
 
         if (!empty($fields['COMMENTS']))
@@ -259,10 +261,15 @@ class Crm
                     $arFields['PHOTO'] = $afile;
                 }
                 */
-                if ($boolAttachPhoto)
+                if (false)
                 {
                     $arFields['PHOTO'] = $arFields['PHOTO']? \CFile::MakeFileArray($strUlphoto): '';
                 }
+                
+                // $strUlphoto="https://hhcdn.ru/photo/580668318.jpeg?t=1605672669&h=ZS5QOtfJcvoWAJE4PtdVeQ";
+                $UrlFileNAME=explode('?',(end(explode('/',$strUlphoto))))[0];	// 580668318.jpeg		
+                
+                
                 $arFields[$ufDolvnostKompanii]=$strVakancy;
                 $arFields[$ufSsilkaNaResume]=$strUlResume;
                 
@@ -291,6 +298,92 @@ class Crm
                 )		
                             */
                 
+
+                
+                $isDiskEnabled = (
+                            \Bitrix\Main\Config\Option::get('disk', 'successfully_converted', false)
+                            && CModule::includeModule('disk')
+                                ? True
+                                : False
+                        );	
+                $storage = \Bitrix\Disk\Driver::getInstance()->getStorageByUserId($sDiskStorageUser); 
+                if ($storage&&$isDiskEnabled) 
+                { 
+                    $folder = $storage->getChild( 
+                        array( 
+                            '=NAME' => $sDiskFolderName,  
+                            'TYPE' => \Bitrix\Disk\Internals\FolderTable::TYPE_FOLDER 
+                        ) 
+                    ); 
+                    if (empty($folder))
+                    {
+                        $folder = $storage->getRootObject(); 
+                    }
+                    $fileArray = \CFile::MakeFileArray($strUlphoto); 
+                    /*
+                    
+                    warning !!   hh.ru can set state 403 
+                    
+                    \$fileArray=Array
+                    (
+                        [name] => 599574120.png
+                        [size] => 180232
+                        [tmp_name] => docroot/upload/tmp/8f9/tmp.03b395b03651d67c7ae502eb20cd7dba
+                        [type] => image/png
+                    )
+                    
+                    
+                    18.11.2020 11:00:28	disk	500	375	25673	image/jpeg	disk/5f1	5f1b5b9ace9e4583ddb6342525d208ef
+                    18.11.2020 10:57:03	disk	0	0	146		text/html	disk/e65	e654b8e9ddc840c961d2ae467d09f0c8
+
+                    */
+
+                    $file = $folder->uploadFile($fileArray, array(  
+                        'CREATED_BY' => $sDiskStorageUser  
+                    ));
+                    if (empty($file))
+                    {
+                        $file = $folder->getChild([
+                            '=NAME'=>$UrlFileNAME,
+                            'TYPE'=>\Bitrix\Disk\Internals\FileTable::TYPE_FILE
+                        ]);
+                    }
+                    
+                    // var_dump($file);
+                    // print_r("\nfile at storage:".$file->getId()."\n");
+                    $stridFileStorage='';
+                    $idFileStorage=$file->getId();
+                    if (!empty($idFileStorage))
+                    {
+                        $stridFileStorage='n'.$idFileStorage;
+                    }
+                    
+                    
+                    $entryID = Bitrix\Crm\Timeline\CommentEntry::create(
+                        array(
+                            'TEXT' => $strMsg = $strVakancy." \n ".$strUlResume,
+                            'SETTINGS' => ['HAS_FILES' => 'Y'],
+                            'AUTHOR_ID' => $sDiskStorageUser,//global$USER->GetID(),
+                            'BINDINGS' => [[
+                                'ENTITY_TYPE_ID' => CCrmOwnerType::Deal //CCrmOwnerType::Contact
+                                , 'ENTITY_ID' => $sDealId
+                            ]],
+                            'FILES'=>array (
+                                  0 => $stridFileStorage,//'n136774',
+                                )
+                        ));					
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                } 						
+                        
                 
             }
 
