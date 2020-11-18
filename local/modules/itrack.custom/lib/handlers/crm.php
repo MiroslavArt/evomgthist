@@ -30,6 +30,71 @@ class Crm
         }
     }
 
+	public static function funcOnAfterCrmTimelineCommentAdd($ID)
+	{
+
+		$checkData = Bitrix\Crm\Timeline\Entity\TimelineTable::getList(
+			array(
+				'select' => [
+					'ID'
+					, 'TYPE_ID'
+					, 'BINDING.ENTITY_TYPE_ID'
+					// ,'BINDING.ENTITY_ID'
+					// ,'AUTHOR_ID'
+					// ,'COMMENT'
+					// ,'SETTINGS'
+				]
+			, 'order' => ['CREATED' => 'desc']
+			, 'filter' => array(
+				'=BINDING.ENTITY_TYPE_ID' => $ownerTypeID = CCrmOwnerType::Deal
+			, '=ID' => $ID
+				// '=BINDING.ENTITY_ID' => $ownerID =999,
+				// 'BINDINGS.ENTITY_ID' => 111388
+			),
+				'runtime' => array(
+					new \Bitrix\Main\Entity\ReferenceField(
+						'BINDING',
+						'\Bitrix\Crm\Timeline\Entity\TimelineBindingTable',
+						array("=ref.OWNER_ID" => "this.ID"),
+						array("join_type" => "INNER")
+					)
+				),
+				'limit' => 2
+			)
+		);
+		$strIdDeal = $checkData->fetch()['CRM_TIMELINE_ENTITY_TIMELINE_BINDING_ENTITY_ID'];
+
+		if(!empty($strIdDeal)) {
+			$currentDbResult = \CCrmDeal::GetList(
+				[],
+				['=ID' => $strIdDeal, 'CHECK_PERMISSIONS' => 'N'],
+				['CONTACT_ID'],
+				false,
+				);
+			$strIdContact = $currentDbResult->Fetch()['CONTACT_ID'];
+
+			$fields = array(
+				'OWNER_ID' => $ID,
+				'ENTITY_TYPE_ID' => CCrmOwnerType::Contact,
+				'ENTITY_ID' => $strIdContact,
+			);
+
+			$connection = Bitrix\Main\Application::getConnection();
+			$queries = $connection->getSqlHelper()->prepareMerge(
+				'b_crm_timeline_bind',
+				array('OWNER_ID', 'ENTITY_TYPE_ID', 'ENTITY_ID'),
+				$fields,
+				$fields
+			);
+
+			foreach ($queries as $query) {
+				$connection->queryExecute($query);
+			}
+		}
+
+	}
+
+    
     public static function onAfterCrmDealUpdate(&$arFields)
     {
         if(!empty(self::$oldFields)) {
@@ -136,4 +201,204 @@ class Crm
     {
         CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_CREATE);
     }
+    
+    public static function fOnAfterCrmDealAdd($fields){
+            /*
+                do not use any throw Except in this time
+            
+                warning !!  $arOptions['CURRENT_USER']=3	VS	SUser->GetID
+            
+                warning !! $ufDolvnostKompanii, $ufSsilkaNaResume must be exist!!!
+            */
+            $ufDolvnostKompanii='UF_CRM_1605532823';//'UF_CRM_1605690367';//'UF_CRM_1605532823'; // 'POST';
+            $ufSsilkaNaResume='UF_CRM_1605542456';//'UF_CRM_1605690484';//'UF_CRM_1605542456'; //
+            $sDiskStorageUser=1;
+            $sDiskFolderName='HRManagement';
+            $sCategoryDealID=63; //60
+          
+
+            if (!empty($fields['COMMENTS']) and $fields["CATEGORY_ID"]==$sCategoryDealID)
+            {
+                $incoming=$fields['COMMENTS'];
+                $sUlResume=function($str){
+                    $retUrl='';
+                    if(preg_match("|<a.*(?=href=\"([^\"]*)\")[^>]*>([^<]*)</a>|i", $str, $matches)){
+                        $retUrl=$matches[1];
+                        }
+                    return $retUrl;
+                    };
+                $sUlphoto=function($str){
+                    $retUrl='';
+                    if(preg_match("|<img.*(?=src=\"([^\"]*)\")[^>]*>([^<]*)|i", $str, $matches)){
+                        $retUrl=$matches[1];
+                        }
+                    return $retUrl;
+                    };
+                    
+                $sVakancy=function($str){
+                    $retUrl='';
+                    $ret=explode('<br>Вакансия:',$str)[1];
+                    $ret=explode('<br>',$ret)[0];
+                    $ret=is_array($ret)?'':trim($ret);
+                    return $ret;
+                    };
+                    
+                $strVakancy=!empty($sVakancy($incoming))?$sVakancy($incoming):$fields["SOURCE_DESCRIPTION"];	
+                $strUlphoto=$sUlphoto($incoming);	
+                $strUlResume=$sUlResume($incoming);
+                $arFields=[];
+                
+                if (\Bitrix\Main\Loader::includeModule('wiki')&&\Bitrix\Main\Loader::includeModule('crm')&&!empty($fields['ID']))
+                {
+                    $strUlphoto=CWikiUtils::htmlspecialchars_decode($strUlphoto);
+                    $sContactId=$fields['CONTACT_ID'];
+                    $sDealId=$fields['ID'];
+                    /*
+                    future use
+                    $fields['PHOTO']="/abcdef.jpg";
+                    $afile=\Bitrix\Main\Application::getDocumentRoot().$fields['PHOTO'];
+                    if (\Bitrix\Main\IO\File::isFileExists($afile))
+                    {
+                        $arFields['PHOTO'] = $afile;
+                    }
+                    */
+                    if (false)
+                    {
+                        $arFields['PHOTO'] = $arFields['PHOTO']? \CFile::MakeFileArray($strUlphoto): '';
+                    }
+                   
+                    // $strUlphoto="https://hhcdn.ru/photo/580668318.jpeg?t=1605672669&h=ZS5QOtfJcvoWAJE4PtdVeQ";
+                    $UrlFileNAME=explode('?',(end(explode('/',$strUlphoto))))[0];	// 580668318.jpeg		
+                    
+                    
+                    $arFields[$ufDolvnostKompanii]=$strVakancy;
+                    $arFields[$ufSsilkaNaResume]=$strUlResume;
+                    $arFields['TITLE']=$strVakancy;
+                    
+                    $CCrmEntity = new CCrmDeal(false);
+
+                    $res = $CCrmEntity->Update(
+                            $sDealId
+                            , $arFields
+                            ,true,true,$arOptions['CURRENT_USER']=$sDiskStorageUser
+                        );
+                            if (!$res)
+                                // throw new Exception($CCrmEntity->LAST_ERROR);
+                                $obj_log_error=($CCrmEntity->LAST_ERROR);			
+                    // var_dump($res);
+                    // print_r($sDealId."\n");
+
+                    /*
+                    Array
+                    (
+                        [PHOTO] => 154449
+                        [POST] => ownership
+                        [~DATE_MODIFY] => now()
+                        [MODIFY_BY_ID] => 0
+                        [FULL_NAME] => Морозова Ольга
+                        [ID] => 4940
+                    )		
+                                */
+                    
+
+                    
+                    $isDiskEnabled = (
+                                \Bitrix\Main\Config\Option::get('disk', 'successfully_converted', false)
+                                && CModule::includeModule('disk')
+                                    ? True
+                                    : False
+                            );	
+                    // $storage = \Bitrix\Disk\Driver::getInstance()->getStorageByUserId($sDiskStorageUser);
+                   
+                    if ($isDiskEnabled) 
+                    { 
+                        $storageID = \Bitrix\Disk\BaseObject::getList(array(
+                                    'select' => array("*"),
+                                    'filter' => $filter=['=NAME'=> $sDiskFolderName],  
+                                ))->Fetch()['ID'];
+                        $folder=Bitrix\Disk\BaseObject::loadById($storageID,['STORAGE']);
+                        if (empty($folder))
+                        {
+                            $folder = $storage->getRootObject(); 
+                        }
+
+                        $fileArray = \CFile::MakeFileArray($strUlphoto); 
+
+                        if (!empty($fileArray))
+                        {
+                            $file =$folder->uploadFile($fileArray, array(  
+                                            'CREATED_BY' => $sDiskStorageUser  
+                                        )); 
+                        }
+
+                        /*
+                        
+                        warning !!   hh.ru can set state 403 
+                        
+                        \$fileArray=Array
+                        (
+                            [name] => 599574120.png
+                            [size] => 180232
+                            [tmp_name] => docroot/upload/tmp/8f9/tmp.03b395b03651d67c7ae502eb20cd7dba
+                            [type] => image/png
+                        )
+                        
+                        
+                        18.11.2020 11:00:28	disk	500	375	25673	image/jpeg	disk/5f1	5f1b5b9ace9e4583ddb6342525d208ef
+                        18.11.2020 10:57:03	disk	0	0	146		text/html	disk/e65	e654b8e9ddc840c961d2ae467d09f0c8
+
+                        */
+                        if (empty($file))
+                        {
+                            $file = $folder->getChild([
+                                '=NAME'=>$UrlFileNAME,
+                                'TYPE'=>\Bitrix\Disk\Internals\FileTable::TYPE_FILE
+                            ]);
+                        }
+                        if (get_class($file)=="Bitrix\Disk\File")
+                        {
+                            $idFileStorage=$file->getId();
+                        }
+                        
+                        // var_dump($file);
+                        // print_r("\nfile at storage:".$file->getId()."\n");
+                        if (!empty($idFileStorage))
+                        {
+                            $stridFileStorage='n'.$idFileStorage;
+                        
+                        
+                        
+                            $entryID = Bitrix\Crm\Timeline\CommentEntry::create(
+                                array(
+                                    'TEXT' => $strMsg = "\n",//$strVakancy." \n ".$strUlResume,
+                                    'SETTINGS' => ['HAS_FILES' => 'Y'],
+                                    'AUTHOR_ID' => $sDiskStorageUser,//global$USER->GetID(),
+                                    'BINDINGS' => [[
+                                        'ENTITY_TYPE_ID' => CCrmOwnerType::Deal //CCrmOwnerType::Contact
+                                        , 'ENTITY_ID' => $sDealId
+                                    ]],
+                                    'FILES'=>array (
+                                          0 => $stridFileStorage,//'n136774',
+                                        )
+                                ));					
+                        
+                        }
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                    } 						
+                            
+                    
+                }
+
+
+                    
+            }
+    }
+
 }
