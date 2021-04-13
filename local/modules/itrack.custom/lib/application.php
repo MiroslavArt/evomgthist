@@ -15,6 +15,10 @@ class Application
     const DEAL_CATEGORY_SEMINAR_PRACTICE_ID = 1;
     const DEAL_CATEGORY_BE4MSK_ID = 30;
     const DEAL_CATEGORY_PROJECT_BE_ID = 56;
+    const DEAL_CATEGORY_ONLINE_COURSE_ID = 54;
+    const DEAL_CATEGORY_BOOKS_TW_ID = 41;
+    const DEAL_CATEGORY_BOOKS_MOSCOW_ID = 5;
+    const DEAL_CATEGORY_FINEVOLUTION_ID = 58;
 
     public static function init()
     {
@@ -39,7 +43,7 @@ class Application
         $eventManager->addEventHandler('main','OnEpilog', ['\iTrack\Custom\Handlers\Main','onEpilog']);
         $eventManager->addEventHandler('im','OnBeforeMessageNotifyAdd', ['\iTrack\Custom\Handlers\Im','onBeforeMessageNotifyAdd']);
         // $eventManager->addEventHandler("crm", "OnAfterCrmTimelineCommentAdd", ['\iTrack\Custom\Handlers\Crm','funcOnAfterCrmTimelineCommentAdd']);
-        $eventManager->addEventHandler('crm','OnAfterCrmDealAdd', ['\iTrack\Custom\Handlers\Crm','fOnAfterCrmDealAdd']);
+        // $eventManager->addEventHandler('crm','OnAfterCrmDealAdd', ['\iTrack\Custom\Handlers\Crm','fOnAfterCrmDealAdd']);
 
 
     }

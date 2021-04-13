@@ -13,7 +13,6 @@ class CrmManager
     {
         $sendpulseBooksIntegration = Sendpulse\Books::getInstance();
         if($sendpulseBooksIntegration->isEnabled()) {
-            // TODO: реализовать очередь в бд, и вытащить обработку на агента
             $sendpulseBooksIntegration->handleDeal($arFields['ID'], $type, $arFields);
         }
     }

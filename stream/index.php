@@ -62,6 +62,10 @@ $APPLICATION->IncludeComponent(
 );?>
 
 <?
+if(CModule::IncludeModule('pull')):
+	$APPLICATION->IncludeComponent("bitrix:intranet.ustat.online", "", [],	false);
+endif;
+
 if(CModule::IncludeModule('intranet')):
 	$APPLICATION->IncludeComponent("bitrix:intranet.ustat.status", "", array(),	false);
 endif;?>
@@ -86,19 +90,17 @@ endif;?>
 <?
 if(CModule::IncludeModule('tasks')):
 	$APPLICATION->IncludeComponent(
-		"bitrix:tasks.filter.v2",
-		"widget",
-		array(
-			"VIEW_TYPE" => 0,
-			"COMMON_FILTER" => array("ONLY_ROOT_TASKS" => "Y"),
-			"USER_ID" => $USER->GetID(),
-			"ROLE_FILTER_SUFFIX" => "",
-			"PATH_TO_TASKS" => "/company/personal/user/".$USER->GetID()."/tasks/",
-			"CHECK_TASK_IN" => "R"
-		),
-		null,
-		array("HIDE_ICONS" => "N")
-	);
+		
+        "bitrix:tasks.widget.rolesfilter",
+        "",
+        [
+          "USER_ID" => $USER->GetID(),
+          "PATH_TO_TASKS" => "/company/personal/user/".$USER->GetID()."/tasks/",
+          "PATH_TO_TASKS_CREATE" => "/company/personal/user/".$USER->GetID()."/tasks/task/edit/0/",
+        ],
+        null,
+        ["HIDE_ICONS" => "N"]);
+      
 endif;?>
 
 <?if ($GLOBALS["USER"]->IsAuthorized())

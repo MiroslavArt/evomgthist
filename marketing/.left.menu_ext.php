@@ -64,8 +64,28 @@ if (\Bitrix\Sender\Security\Access::current()->canViewRc())
 		""
 	);
 }
+if (
+	method_exists(\Bitrix\Sender\Security\Access::current(), 'canViewToloka')
+	&& \Bitrix\Sender\Security\Access::current()->canViewToloka()
+)
+{
+	$aMenuLinks[] = Array(
+		GetMessage('SERVICES_MENU_MARKETING_YANDEX_TOLOKA'),
+		"/marketing/toloka/",
+		Array(),
+		Array(),
+		""
+	);
+}
 
-if (\Bitrix\Sender\Security\Access::current()->canViewLetters())
+$canViewTemplates = method_exists(
+	\Bitrix\Sender\Security\Access::class,
+	'canViewTemplates') ?
+	\Bitrix\Sender\Security\Access::current()->canViewTemplates() :
+	\Bitrix\Sender\Security\Access::current()->canViewLetters();
+
+
+if ($canViewTemplates)
 {
 	$aMenuLinks[] = Array(
 		GetMessage('SERVICES_MENU_MARKETING_TEMPLATES'),
@@ -87,7 +107,13 @@ if (\Bitrix\Sender\Security\Access::current()->canViewBlacklist())
 	);
 }
 
-if (\Bitrix\Sender\Security\Access::current()->canViewSegments())
+$canViewClientList = method_exists(
+	\Bitrix\Sender\Security\Access::class,
+	'canViewClientList') ?
+	\Bitrix\Sender\Security\Access::current()->canViewClientList() :
+	\Bitrix\Sender\Security\Access::current()->canViewSegments();
+
+if ($canViewClientList)
 {
 	$aMenuLinks[] = Array(
 		GetMessage('SERVICES_MENU_MARKETING_CONTACT'),

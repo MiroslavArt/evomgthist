@@ -12,6 +12,7 @@ class Crm
     private static $isFinalStage = false;
     private static $oldFields = [];
     private static $ufWEbinarViewedCountData = [];
+    private static $activeHandler = false;
 
     public static function onBeforeCrmDealUpdate(&$arFields)
     {
@@ -69,7 +70,7 @@ class Crm
 				[],
 				['=ID' => $strIdDeal, 'CHECK_PERMISSIONS' => 'N'],
 				['CONTACT_ID'],
-				false,
+				false
 				);
 			$strIdContact = $currentDbResult->Fetch()['CONTACT_ID'];
 
@@ -100,6 +101,10 @@ class Crm
         if(!empty(self::$oldFields)) {
             $arFields['C_OLD_FIELDS'] = self::$oldFields;
             self::$oldFields = [];
+        }
+
+        if(static::$activeHandler === true) {
+            return;
         }
 
         if(!empty($arFields['ASSIGNED_BY_ID']) && !empty(self::$oldAssignedId) && (int)$arFields['ASSIGNED_BY_ID'] !== self::$oldAssignedId && !self::$isFinalStage) {
@@ -178,12 +183,16 @@ class Crm
                     $obDeal = new \CCrmDeal(false);
                     $arUpdateFields = ['UF_CRM_1591020493' => $enumId];
                     $arFields['C_OLD_FIELDS']['UF_CRM_1591020493'] = $arDeal['UF_CRM_1582269904'];
+                    static::$activeHandler = true;
                     $obDeal->Update($arDeal['ID'], $arUpdateFields);
+                    static::$activeHandler = false;
                 }
             }
         }
 
+        static::$activeHandler = true;
         CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_UPDATE);
+        static::$activeHandler = false;
     }
 
     protected static function getWebinarViewedCountUFValues()
@@ -199,8 +208,15 @@ class Crm
 
     public static function onAfterCrmDealAdd(&$arFields)
     {
+        if(static::$activeHandler === true) {
+            return;
+        }
+
+        static::$activeHandler = true;
         CrmManager::handleDealEvent($arFields, CrmManager::DEAL_AFTER_CREATE);
+        static::$activeHandler = false;
     }
+    
     
     public static function fOnAfterCrmDealAdd($fields){
             /*
@@ -215,10 +231,17 @@ class Crm
             $sDiskStorageUser=1;
             $sDiskFolderName='HRManagement';
             $sCategoryDealID=63; //60
-          
+
+if (!empty($fields) and (!is_array($fields))){$fields=[$fields];}
+		if (is_array($fields) and (!empty($fields))){
+			file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>$fields]), FILE_APPEND);
+		}        
 
             if (!empty($fields['COMMENTS']) and $fields["CATEGORY_ID"]==$sCategoryDealID)
             {
+                
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>['stroke'=>'228 run','HIDE'=>$fields['COMMENTS']]]), FILE_APPEND);
+                
                 $incoming=$fields['COMMENTS'];
                 $sUlResume=function($str){
                     $retUrl='';
@@ -248,7 +271,7 @@ class Crm
                 $strUlResume=$sUlResume($incoming);
                 $arFields=[];
                 
-                if (\Bitrix\Main\Loader::includeModule('wiki')&&\Bitrix\Main\Loader::includeModule('crm')&&!empty($fields['ID']))
+                if (\Bitrix\Main\Loader::includeModule('wiki')&&\Bitrix\Main\Loader::includeModule('crm'))
                 {
                     $strUlphoto=CWikiUtils::htmlspecialchars_decode($strUlphoto);
                     $sContactId=$fields['CONTACT_ID'];
@@ -262,6 +285,7 @@ class Crm
                         $arFields['PHOTO'] = $afile;
                     }
                     */
+
                     if (false)
                     {
                         $arFields['PHOTO'] = $arFields['PHOTO']? \CFile::MakeFileArray($strUlphoto): '';
@@ -269,12 +293,12 @@ class Crm
                    
                     // $strUlphoto="https://hhcdn.ru/photo/580668318.jpeg?t=1605672669&h=ZS5QOtfJcvoWAJE4PtdVeQ";
                     $UrlFileNAME=explode('?',(end(explode('/',$strUlphoto))))[0];	// 580668318.jpeg		
-                    
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>['str'=>281,[$strUlphoto,$UrlFileNAME]]]), FILE_APPEND);                 
                     
                     $arFields[$ufDolvnostKompanii]=$strVakancy;
                     $arFields[$ufSsilkaNaResume]=$strUlResume;
                     $arFields['TITLE']=$strVakancy;
-                    
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>$arFields]), FILE_APPEND);                    
                     $CCrmEntity = new CCrmDeal(false);
 
                     $res = $CCrmEntity->Update(
@@ -285,6 +309,7 @@ class Crm
                             if (!$res)
                                 // throw new Exception($CCrmEntity->LAST_ERROR);
                                 $obj_log_error=($CCrmEntity->LAST_ERROR);			
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>['res289'=>$res]]), FILE_APPEND); 
                     // var_dump($res);
                     // print_r($sDealId."\n");
 
@@ -323,7 +348,7 @@ class Crm
                         }
 
                         $fileArray = \CFile::MakeFileArray($strUlphoto); 
-
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>['336fileArray'=>$fileArray]]), FILE_APPEND); 
                         if (!empty($fileArray))
                         {
                             $file =$folder->uploadFile($fileArray, array(  
@@ -360,27 +385,28 @@ class Crm
                             $idFileStorage=$file->getId();
                         }
                         
+                        $stridFileStorage='';
                         // var_dump($file);
                         // print_r("\nfile at storage:".$file->getId()."\n");
                         if (!empty($idFileStorage))
                         {
                             $stridFileStorage='n'.$idFileStorage;
                         
+file_put_contents($_SERVER['DOCUMENT_ROOT'].'/bitrix/fOnAfterCrmDealAdd_1_log.json', ",".json_encode(['time'=>intval(microtime(true)),'inf'=>['380$idFileStorage'=>$idFileStorage]]), FILE_APPEND);                        
                         
-                        
-                            $entryID = Bitrix\Crm\Timeline\CommentEntry::create(
-                                array(
-                                    'TEXT' => $strMsg = "\n",//$strVakancy." \n ".$strUlResume,
-                                    'SETTINGS' => ['HAS_FILES' => 'Y'],
-                                    'AUTHOR_ID' => $sDiskStorageUser,//global$USER->GetID(),
-                                    'BINDINGS' => [[
-                                        'ENTITY_TYPE_ID' => CCrmOwnerType::Deal //CCrmOwnerType::Contact
-                                        , 'ENTITY_ID' => $sDealId
-                                    ]],
-                                    'FILES'=>array (
-                                          0 => $stridFileStorage,//'n136774',
-                                        )
-                                ));					
+                        $entryID = Bitrix\Crm\Timeline\CommentEntry::create(
+                            array(
+                                'TEXT' => $strMsg = "\n",//$strVakancy." \n ".$strUlResume,
+                                'SETTINGS' => ['HAS_FILES' => 'Y'],
+                                'AUTHOR_ID' => $sDiskStorageUser,//global$USER->GetID(),
+                                'BINDINGS' => [[
+                                    'ENTITY_TYPE_ID' => CCrmOwnerType::Deal //CCrmOwnerType::Contact
+                                    , 'ENTITY_ID' => $sDealId
+                                ]],
+                                'FILES'=>array (
+                                      0 => $stridFileStorage,//'n136774',
+                                    )
+                            ));					
                         
                         }
                         

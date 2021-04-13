@@ -57,7 +57,7 @@ if (ModuleManager::isModuleInstalled("timeman"))
 		{
 			$aMenuLinks[] = [
 				Loc::getMessage("TOP_MENU_WORK_SCHEDULES"),
-				SITE_DIR . "timeman/schedules/list/",
+				SITE_DIR . "timeman/schedules/",
 				[],
 				["menu_item_id" => "menu_schedules_list"],
 				"CBXFeatures::IsFeatureEnabled('timeman')",

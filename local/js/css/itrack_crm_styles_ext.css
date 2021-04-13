@@ -1,9 +1,12 @@
-.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action {
+.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action,
+.crm-entity-stream-container-list .crm-entity-stream-section-new .main-buttons-inner-container .main-buttons-item{
     display: none;
 }
 .crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action[data-item-id='comment'],
-.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action[data-item-id='task'] {
-    display: block;
+.crm-entity-stream-container-list .crm-entity-stream-section-content-new-header .crm-entity-stream-section-new-action[data-item-id='task'],
+.crm-entity-stream-container-list .crm-entity-stream-section-new .main-buttons-inner-container .main-buttons-item[data-id='comment'],
+.crm-entity-stream-container-list .crm-entity-stream-section-new .main-buttons-inner-container .main-buttons-item[data-id='task'] {
+    display: inline-block;
 }
 .crm-entity-section-tabs .crm-entity-section-tab {
     display: none;
@@ -13,8 +16,10 @@ body.itrack-user .crm-entity-section-tabs .crm-entity-section-tab {
 }
 .crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='main'],
 .crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_deal'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_products'],
 .crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_invoice'],
 .crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_tree'],
+.crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_rest_16'],
 .crm-entity-section-tabs .crm-entity-section-tab[data-tab-id='tab_event'] {
     display: inline-block;
 }
@@ -37,5 +42,5 @@ body.itrack-user .crm-entity-section-tabs .crm-entity-section-tab {
 }
 /** temp hide  */
 .crm-entity-widget-content-block-inner-pay-button {
-    display: none;
+    visibility: hidden;
 }

@@ -17,6 +17,15 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS")
 define("BX_SKIP_USER_LIMIT_CHECK", true);
 define("ADMIN_SECTION",false);
 require($_SERVER["DOCUMENT_ROOT"]."/desktop_app/headers.php");
+
+if (!defined("BX_FORCE_DISABLE_SEPARATED_SESSION_MODE"))
+{
+	if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match('%Bitrix24.Disk/([0-9.]+)%i', $_SERVER['HTTP_USER_AGENT']))
+	{
+		define("BX_FORCE_DISABLE_SEPARATED_SESSION_MODE", true);
+	}
+}
+
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
 if (!CModule::IncludeModule('im'))
@@ -78,8 +87,16 @@ if ($result !== true || !$USER->IsAuthorized())
 			$answer["code"] = "network_error";
 			sendResponse($answer, "521 Internal Bitrix24.Network error");
 
-			$user = new CUser;
-			$user->Update($userId, ["LOGIN_ATTEMPTS" => 0]);
+			if (!empty($_POST['LOGIN']))
+			{
+				$dbRes = CUser::GetList($by, $order, array("LOGIN_EQUAL_EXACT" => $_POST['LOGIN']), array('FIELDS' => array('ID')));
+				$arUser = $dbRes->fetch();
+				if ($arUser)
+				{
+					$user = new CUser;
+					$user->Update($arUser['ID'], ["LOGIN_ATTEMPTS" => 0]);
+				}
+			}
 
 			exit;
 		}
@@ -99,7 +116,7 @@ if ($USER->IsAuthorized() && !isAccessAllowed())
 
 if (
 	\Bitrix\Main\Loader::includeModule('bitrix24') &&
-	strpos(Context::getCurrent()->getRequest()->getUserAgent(), 'Bitrix24.Disk') !== false &&
+	mb_strpos(Context::getCurrent()->getRequest()->getUserAgent(), 'Bitrix24.Disk') !== false &&
 	\Bitrix\Bitrix24\Limits\User::isUserRestricted($USER->GetID())
 )
 {
@@ -122,7 +139,7 @@ if(
 )
 {
 	$code = '';
-	if (strlen($_POST['user_os_mark']) > 0)
+	if ($_POST['user_os_mark'] <> '')
 	{
 		$code = md5($_POST['user_os_mark'].$_POST['user_account']);
 	}

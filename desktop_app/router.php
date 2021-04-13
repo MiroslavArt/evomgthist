@@ -9,7 +9,7 @@ if (isset($_GET['alias']))
 	if (
 		isset($_GET['widget_user_lang'])
 		&& preg_match("/^[a-z]{2,2}$/", $_GET['widget_user_lang'])
-		&& strlen($_GET['widget_user_lang']) == 2
+		&& mb_strlen($_GET['widget_user_lang']) == 2
 		&& @is_dir($widgetUserLangPath . $_GET['widget_user_lang'])
 	)
 	{
@@ -19,7 +19,7 @@ if (isset($_GET['alias']))
 	elseif (
 		isset($_COOKIE['WIDGET_USER_LANG'])
 		&& preg_match("/^[a-z]{2,2}$/", $_COOKIE['WIDGET_USER_LANG'])
-		&& strlen($_COOKIE['WIDGET_USER_LANG']) == 2
+		&& mb_strlen($_COOKIE['WIDGET_USER_LANG']) == 2
 		&& @is_dir($widgetUserLangPath . $_COOKIE['WIDGET_USER_LANG'])
 	)
 	{

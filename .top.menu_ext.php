@@ -23,7 +23,7 @@ if (!function_exists("getLeftMenuItemLink"))
 	{
 		$settings = CUserOptions::GetOption("UI", $sectionId);
 		return
-			is_array($settings) && isset($settings["firstPageLink"]) && strlen($settings["firstPageLink"]) ?
+			is_array($settings) && isset($settings["firstPageLink"]) && mb_strlen($settings["firstPageLink"]) ?
 				$settings["firstPageLink"] :
 				$defaultLink;
 	}
@@ -52,7 +52,7 @@ global $USER;
 
 $arMenuB24 = array(
 	array(
-		GetMessage("TOP_MENU_LIVE_FEED"),
+		GetMessage("TOP_MENU_LIVE_FEED2"),
 		file_exists($_SERVER["DOCUMENT_ROOT"].SITE_DIR."stream/") ? SITE_DIR."stream/" : SITE_DIR,
 		array(),
 		array(
@@ -346,9 +346,22 @@ if (CModule::IncludeModule("im"))
 			"counter_id" => "im-message",
 			"menu_item_id" => "menu_im_messenger",
 			"my_tools_section" => true,
+			"can_be_first_item" => false
 		),
 		"CBXFeatures::IsFeatureEnabled('WebMessenger')"
 	);
+
+	$arMenuB24[] = [
+		GetMessage("TOP_MENU_IM_CONFERENCE"),
+		SITE_DIR."conference/",
+		[],
+		[
+			"menu_item_id" => "menu_conference",
+			"top_menu_id" => "top_menu_id_conference",
+			"is_beta" => true
+		],
+		""
+	];
 }
 
 if (CModule::IncludeModule("intranet") && CIntranetUtils::IsExternalMailAvailable())
@@ -521,7 +534,7 @@ if (file_exists($_SERVER["DOCUMENT_ROOT"].SITE_DIR."about/"))
 }
 
 $arMenuB24[] = array(
-	GetMessage("TOP_MENU_MARKETPLACE"),
+	GetMessage("TOP_MENU_MARKETPLACE_2"),
 	SITE_DIR."marketplace/",
 	array(SITE_DIR."marketplace/"),
 	array(
@@ -531,6 +544,21 @@ $arMenuB24[] = array(
 		),
 		"menu_item_id"=>"menu_marketplace_sect",
 		"top_menu_id" => "top_menu_id_marketplace"
+	),
+	"IsModuleInstalled('rest')"
+);
+
+$arMenuB24[] = array(
+	GetMessage("TOP_MENU_DEVOPS"),
+	SITE_DIR."devops/",
+	array(SITE_DIR."devops/"),
+	array(
+		"real_link" => getLeftMenuItemLink(
+			"top_menu_id_devops",
+			SITE_DIR."devops/"
+		),
+		"menu_item_id"=>"menu_devops_sect",
+		"top_menu_id" => "top_menu_id_devops"
 	),
 	"IsModuleInstalled('rest')"
 );

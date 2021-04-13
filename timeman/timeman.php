@@ -16,7 +16,8 @@ if (\Bitrix\Main\Loader::includeModule('timeman'))
 			"POPUP_COMPONENT_TEMPLATE_NAME" => "",
 			"POPUP_COMPONENT_PARAMS" => array(
 				'SCHEDULE_ID' => $_REQUEST['SCHEDULE_ID'],
-			)
+			),
+			"USE_UI_TOOLBAR" => "Y"
 		)
 	);
 }
