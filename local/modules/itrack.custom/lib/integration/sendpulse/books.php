@@ -210,9 +210,12 @@ class Books
                             $bookFound = true;
                             foreach ($obEmail->variables as $vname=>$vval) {
                                 if ($vname === 'ss' && $vval !== $correctSegment) {
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$vval.'>'.$correctSegment, "изменился", "sendpulse/".date('d.m.Y').".log");
                                 //if (!empty($obVariable->ss) && $obVariable->ss !== $correctSegment) {
                                     $this->api->updateEmailVariables($bookId, $email, ['ss' => $correctSegment]);
                                     break;
+                                } else {
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$vval.'>'.$vval, "не изменился", "sendpulse/".date('d.m.Y').".log");
                                 }
                             }
                         }
@@ -1189,8 +1192,11 @@ class Books
                             if ($obVariable->name === 'ss') {
                                 $segmentFound = true;
                                 if ($obVariable->value !== $correctSegment) {
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$obVariable->value.'>'.$correctSegment, "изменился", "sendpulse/".date('d.m.Y').".log");
                                     $this->api->updateEmailVariables($obBookEmail->book_id, $email, ['ss' => $correctSegment]);
                                     break;
+                                } else {
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$obVariable->value.'>'.$obVariable->value, "не изменился", "sendpulse/".date('d.m.Y').".log");
                                 }
                             }
                         }
