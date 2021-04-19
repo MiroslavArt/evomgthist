@@ -66,7 +66,7 @@ class Books
             ];
         }
     }
-    
+
     private function __clone() {}
     private function __wakeup() {}
 
@@ -205,18 +205,18 @@ class Books
                         if ($correctBookId !== $bookId) {
                             $this->api->removeEmails($bookId, [$email]);
                             print 'delete ' . $this->arRemoteBooksRef['id2value'][$bookId] . PHP_EOL;
-                            \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$bookId.' '.current($obEmail->variables).'>', "удален(DELETE)", "sendpulse/".date('d.m.Y').".log");
+                            \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$bookId].' '.current($obEmail->variables).'>', "удален агентом(DELETE)", "sendpulse/".date('d.m.Y').".log");
                             unset($bookEmails[$bookId]);
                         } else {
                             $bookFound = true;
                             foreach ($obEmail->variables as $vname=>$vval) {
                                 if ($vname === 'ss' && $vval !== $correctSegment) {
-                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$bookId.' '.$vval.'>'.$bookId.' '.$correctSegment, "изменился(UPD)", "sendpulse/".date('d.m.Y').".log");
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$bookId].' '.$vval.'>'.$this->arRemoteBooksRef['id2value'][$bookId].' '.$correctSegment, "изменился агентом(UPD)", "sendpulse/".date('d.m.Y').".log");
                                     //if (!empty($obVariable->ss) && $obVariable->ss !== $correctSegment) {
                                     $this->api->updateEmailVariables($bookId, $email, ['ss' => $correctSegment]);
                                     break;
                                 } else {
-                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$vval.'>'.$bookId.' '.$vval, "не изменился(STABLE)", "sendpulse/".date('d.m.Y').".log");
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$bookId].' '.$vval.'>'.$this->arRemoteBooksRef['id2value'][$bookId].' '.$vval, "не изменился агентом(STABLE)", "sendpulse/".date('d.m.Y').".log");
                                 }
                             }
                         }
@@ -225,7 +225,7 @@ class Books
                         $arFields = $this->makeEmailFields($arContacts[$email][0]);
                         $arFields['variables']['ss'] = $correctSegment;
                         $result = $this->api->addEmails($correctBookId, [$arFields]);
-                        \Bitrix\Main\Diag\Debug::writeToFile($correctBookId.' '.$correctSegment, "добавлен(ADD)", "sendpulse/".date('d.m.Y').".log");
+                        \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$correctBookId.' '.$this->arRemoteBooksRef['id2value'][$correctBookId], "добавлен агентом(ADD)", "sendpulse/".date('d.m.Y').".log");
                         print "correct book added" . PHP_EOL;
                     }
                     print 'correct: ' . $this->arRemoteBooksRef['id2value'][$correctBookId] . PHP_EOL;
@@ -562,8 +562,8 @@ class Books
                                 $bNeedAdd = false;
                                 $this->updateRemoteWebinarValue($obBookEmail->book_id, $arDeal);
                                 foreach ($obBookEmail->variables as $obVariable) {
-                                    if ($obVariable->name === 'ss' 
-                                        && $obVariable->value == self::BOOK_SEGMENT_COLD 
+                                    if ($obVariable->name === 'ss'
+                                        && $obVariable->value == self::BOOK_SEGMENT_COLD
                                         && !empty($arDeal['CONTACT'][Constants::UF_CONTACT_WEBINAR_COMPLETE_CODE])
                                         && count($arDeal['CONTACT'][Constants::UF_CONTACT_WEBINAR_COMPLETE_CODE]) >= 2) {
                                         $this->api->updateEmailVariables($this->arRemoteBooksRef['value2id'][self::BOOK_GREENBASE_NAME], $email, ['ss' => self::BOOK_SEGMENT_WARM]);
@@ -811,7 +811,7 @@ class Books
 
     /*protected function handleDealUpdate($arDeal, $arEventDealFields)
     {
-        
+
         $email = $arDeal['CONTACT']['EMAIL'];
         if (!empty($email)) {
             $arEmailData = $this->api->getEmailGlobalInfo($email);
@@ -1187,7 +1187,7 @@ class Books
                 ])) {
                     if ($correctBookId !== $obBookEmail->book_id) {
                         $this->api->removeEmails($obBookEmail->book_id, [$email]);
-                        \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$obBookEmail->book_id.' '.current($obBookEmail->variables).'>', "удален(DELETE)", "sendpulse/".date('d.m.Y').".log");
+                        \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$obBookEmail->book_id].' '.current($obBookEmail->variables).'>', "удален(DELETE)", "sendpulse/".date('d.m.Y').".log");
                     } else {
                         $bookFound = true;
                         $segmentFound = false;
@@ -1196,10 +1196,10 @@ class Books
                                 $segmentFound = true;
                                 if ($obVariable->value !== $correctSegment) {
                                     $this->api->updateEmailVariables($obBookEmail->book_id, $email, ['ss' => $correctSegment]);
-                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$obBookEmail->book_id.' '.$obVariable->value.'>'.$obBookEmail->book_id.' '.$correctSegment, "изменился(UPD)", "sendpulse/".date('d.m.Y').".log");
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$obBookEmail->book_id].' '.$obVariable->value.'>'.$this->arRemoteBooksRef['id2value'][$obBookEmail->book_id].' '.$correctSegment, "изменился(UPD)", "sendpulse/".date('d.m.Y').".log");
                                     break;
                                 } else {
-                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$obBookEmail->book_id.' '.$obVariable->value.'>'.$obBookEmail->book_id.' '.$correctSegment, "не изменился(STABLE)", "sendpulse/".date('d.m.Y').".log");
+                                    \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$obBookEmail->book_id].' '.$obVariable->value.'>'.$this->arRemoteBooksRef['id2value'][$obBookEmail->book_id].' '.$correctSegment, "не изменился(STABLE)", "sendpulse/".date('d.m.Y').".log");
                                 }
                             }
                         }
@@ -1221,7 +1221,7 @@ class Books
                 $arFields['variables']['webinar'] = $arDeal[Constants::UF_DEAL_WEBINAR_NAME_CODE].' '.$arDeal[Constants::UF_DEAL_WEBINAR_DATE_CODE];
             }
             $result = $this->api->addEmails($correctBookId, [$arFields]);
-            \Bitrix\Main\Diag\Debug::writeToFile($correctBookId.' '.$correctSegment, "добавлен(ADD)", "sendpulse/".date('d.m.Y').".log");
+            \Bitrix\Main\Diag\Debug::writeToFile($email.' '.$this->arRemoteBooksRef['id2value'][$correctBookId].' '.$correctSegment, "добавлен(ADD)", "sendpulse/".date('d.m.Y').".log");
             $this->processAddResult($result, $arDeal, $arFields);
         }
     }
