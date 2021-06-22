@@ -8,10 +8,12 @@ class Getcourse
 {
     public static function checkupdate()
     {
-        if (\Bitrix\Main\Loader::includeModule('crm')) {
+        $apikey = \COption::GetOptionString('itrack.custom', 'getcourse_api_key');
+        if (\Bitrix\Main\Loader::includeModule('crm') && $apikey) {
             $queryParams = [
-                'key' => 'bREzyRLW2ssbqVD0juwfPoIvKxZFbRQf9RwwoWdEyIXMNRrBSRxAvbiatfWIwnNUydmVrhtHh9n9vMGcJ7ahyUxXR8vwDnpheafHwZ17Mt8JXQ9iN0dxLCytlDo3mCZB',
-                'status_changed_at[from]' => '2021-06-16', //date("Y-m-d"),//'2021-05-31',
+                //'key' => 'bREzyRLW2ssbqVD0juwfPoIvKxZFbRQf9RwwoWdEyIXMNRrBSRxAvbiatfWIwnNUydmVrhtHh9n9vMGcJ7ahyUxXR8vwDnpheafHwZ17Mt8JXQ9iN0dxLCytlDo3mCZB',
+                'key' => $apikey,
+                'status_changed_at[from]' => date("Y-m-d"), //'2021-06-16', //date("Y-m-d"),//'2021-05-31',
                 'status_changed_at[to]' => date("Y-m-d")//'2021-06-16'
             ];
 
@@ -35,7 +37,7 @@ class Getcourse
                 do{
                     sleep(10);
                     $queryParams = [
-                        'key' => 'bREzyRLW2ssbqVD0juwfPoIvKxZFbRQf9RwwoWdEyIXMNRrBSRxAvbiatfWIwnNUydmVrhtHh9n9vMGcJ7ahyUxXR8vwDnpheafHwZ17Mt8JXQ9iN0dxLCytlDo3mCZB'
+                        'key' => $apikey //'bREzyRLW2ssbqVD0juwfPoIvKxZFbRQf9RwwoWdEyIXMNRrBSRxAvbiatfWIwnNUydmVrhtHh9n9vMGcJ7ahyUxXR8vwDnpheafHwZ17Mt8JXQ9iN0dxLCytlDo3mCZB'
                     ];
 
                     $url = 'https://evomgtorg.getcourse.ru/pl/api/account/exports/'.$res['info']['export_id'].'?' . http_build_query($queryParams);
@@ -65,7 +67,7 @@ class Getcourse
                             $stageid = "C54:NEW";
                             if($item[9]=="Завершен" && $item[7]) {
                                 $stageid = "C54:4";
-                            } elseif($item[9]=="Завершен" && !$item[7] && $arResdeal['STAGE_ID']!="C54:LOSE") {
+                            } elseif($item[9]=="Завершен" && !$item[7]) {
                                 $stageid = "C54:LOSE";
                             }
 

@@ -74,6 +74,14 @@ $arAllOptions = [
             Option::get($MODULE_ID, 'sendpulse_sync_books'),
             ['checkbox']
         ]
+    ],
+    'getcourse' => [
+        [
+            'getcourse_api_key',
+            Loc::getMessage($MODULE_ID.'_getcourse_api_key'),
+            Option::get($MODULE_ID, 'getcourse_api_key'),
+            ['text']
+        ]
     ]
 ];
 
@@ -100,6 +108,13 @@ $arTabs = [
         "TAB" => Loc::getMessage($MODULE_ID.'_sendpulse_tab_title'),
         "ICON" => $MODULE_ID . '_settings',
         "TITLE" => Loc::getMessage($MODULE_ID.'_sendpulse_tab_subtitle'),
+        'TYPE' => 'options', //options || rights || user defined
+    ],
+    [
+        "DIV" => "getcourse",
+        "TAB" => Loc::getMessage($MODULE_ID.'_getcourse_tab_title'),
+        "ICON" => $MODULE_ID . '_settings',
+        "TITLE" => Loc::getMessage($MODULE_ID.'_getcourse_tab_subtitle'),
         'TYPE' => 'options', //options || rights || user defined
     ]
 ];
