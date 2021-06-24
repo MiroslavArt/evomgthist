@@ -14,6 +14,8 @@ $MESS[$MODULE_ID.'_sendpulse_tab_subtitle'] = 'Интеграция с Sendpulse
 $MESS[$MODULE_ID.'_sendpulse_sync_books'] = 'Синхронизация адресных книг';
 
 $MESS[$MODULE_ID.'_getcourse_api_key'] = 'АПИ ключ Геткурс';
+$MESS[$MODULE_ID.'_getcourse_token'] = 'Токен для импорта из Геткурс';
+$MESS[$MODULE_ID.'_getcourse_enable_imp'] = 'Разрешить импорт из Геткурс';
 $MESS[$MODULE_ID.'_getcourse_tab_title'] = 'Геткурс';
 $MESS[$MODULE_ID.'_getcourse_tab_subtitle'] = 'Интеграция с Геткурс';
 

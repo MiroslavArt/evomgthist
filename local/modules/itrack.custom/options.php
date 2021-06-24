@@ -80,6 +80,14 @@ $arAllOptions = [
             'getcourse_api_key',
             Loc::getMessage($MODULE_ID.'_getcourse_api_key'),
             Option::get($MODULE_ID, 'getcourse_api_key'),
+            ['text'],
+            'getcourse_enable_imp',
+            Loc::getMessage($MODULE_ID.'_getcourse_enable_imp'),
+            Option::get($MODULE_ID, 'getcourse_enable_imp'),
+            ['checkbox'],
+            'getcourse_token',
+            Loc::getMessage($MODULE_ID.'_getcourse_token'),
+            Option::get($MODULE_ID, 'getcourse_token'),
             ['text']
         ]
     ]
