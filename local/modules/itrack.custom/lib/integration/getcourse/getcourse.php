@@ -9,7 +9,7 @@ use Bitrix\Main\Web\Json;
 use Bitrix\Main\Type\DateTime;
 use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
 
-class Processrequest
+class Getcourseimp
 {
     private $webhookToken;
     private $enabled = false;
@@ -49,7 +49,8 @@ class Processrequest
                     $addResult = $entity_data_class::add(array(
                         'UF_ORDER'         => $order,
                         'UF_STATUS'         => $status,
-                        'UF_PROCESSED'        => '0'
+                        'UF_PROCESSED'        => '0',
+                        'UF_DATEIMP' => date("d.m.Y")
                     ));
                     if (!$addResult->isSuccess()) {
                         $this->result->addError(new Error('save error'));

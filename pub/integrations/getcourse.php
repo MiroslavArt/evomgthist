@@ -11,8 +11,10 @@ global $APPLICATION;
 require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
 if(Bitrix\Main\Loader::includeModule('itrack.custom')) {
-    $gk = new iTrack\Custom\Integration\Getcourse\Processrequest();
+    $gk = new iTrack\Custom\Integration\Getcourse\Getcourseimp();
     $gk->processWebhook();
 }
 
 die();
+
+
