@@ -42,16 +42,15 @@ class Getcourseimp
                     $status = $request->get('status');
                     if($order) {
                         if($status=='began' || $status=='60pers' || $status=='completed' || $status=='failed') {
-
+                            $entity_data_class =  $this->GetEntityDataClass(MY_HL_BLOCK_ID);
+                            $addResult = $entity_data_class::add(array(
+                                'UF_ORDER'         => $order,
+                                'UF_STATUS'         => $status,
+                                'UF_PROCESSED'        => '0',
+                                'UF_DATEIMP' => date("d.m.Y")
+                            ));
                         }
                     }
-                    $entity_data_class =  $this->GetEntityDataClass(MY_HL_BLOCK_ID);
-                    $addResult = $entity_data_class::add(array(
-                        'UF_ORDER'         => $order,
-                        'UF_STATUS'         => $status,
-                        'UF_PROCESSED'        => '0',
-                        'UF_DATEIMP' => date("d.m.Y")
-                    ));
                     if (!$addResult->isSuccess()) {
                         $this->result->addError(new Error('save error'));
                     }
