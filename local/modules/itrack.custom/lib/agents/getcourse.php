@@ -4,6 +4,8 @@
 namespace iTrack\Custom\Agents;
 
 
+use Itrack\Custom\Helpers\Utils;
+
 class Getcourse
 {
     public static function checkupdate()
@@ -172,6 +174,49 @@ class Getcourse
             }
         }
         return '\iTrack\Custom\Agents\Getcourse::checkupdate();';
+    }
+
+    public static function checkupdatestudy()
+    {
+        \Bitrix\Main\Loader::includeModule('crm');
+        $deal=new \CCrmDeal(false);
+        define("MY_HL_BLOCK_ID", 2);
+        $entity_data_class = Utils::GetEntityDataClass(MY_HL_BLOCK_ID);
+        $rsData = $entity_data_class::getList(array(
+            'select' => array('*'),
+            'order' => array('ID' => 'ASC'),
+            //'limit' => '10',//ограничиваем выборку 10-ю элементами
+            'filter' => array('UF_PROCESSED' => '0')
+        ));
+        while($el = $rsData->fetch()){
+            $arFilter = array(
+                "UF_CRM_1623913964"=>$el['UF_ORDER'], //выбираем определенную сделку по ID
+                "CHECK_PERMISSIONS"=>"N" //не проверять права доступа текущего пользователя
+            );
+            $arSelect = array(
+                "ID",
+                "STAGE_ID",
+                "UF_*"
+            );
+            $res = \CCrmDeal::GetListEx(Array(), $arFilter, false, false, $arSelect);
+            $arDeal = $res->fetch();
+            if($arDeal) {
+                if($el['UF_STATUS']=='began' && $arDeal['STAGE_ID']!='C54:4') {
+                    $arParams["STAGE_ID"]='C54:4';
+                } elseif($el['UF_STATUS']=='60pers' && $arDeal['STAGE_ID']!='C54:6') {
+                    $arParams["STAGE_ID"]='C54:6';
+                } elseif($el['UF_STATUS']=='completed' && $arDeal['STAGE_ID']!='C54:WON') {
+                    $arParams["STAGE_ID"]='C54:WON';
+                } elseif($el['UF_STATUS']=='failed' && $arDeal['STAGE_ID']!='C54:5') {
+                    $arParams["STAGE_ID"]='C54:5';
+                }
+                $res = $deal->Update($arDeal['ID'],$arParams);
+            }
+            $result = $entity_data_class::update($el['ID'], array(
+                'UF_PROCESSED'       => '1'
+            ));
+        }
+        return '\iTrack\Custom\Agents\Getcourse::checkupdatestudy();';
     }
 }
 

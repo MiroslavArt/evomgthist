@@ -7,7 +7,8 @@ use Bitrix\Main\Result;
 use Bitrix\Main\Error;
 use Bitrix\Main\Web\Json;
 use Bitrix\Main\Type\DateTime;
-use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
+//use Bitrix\Highloadblock\HighloadBlockTable as HLBT;
+use Itrack\Custom\Helpers\Utils;
 
 class Getcourseimp
 {
@@ -42,7 +43,8 @@ class Getcourseimp
                     $status = $request->get('status');
                     if($order) {
                         if($status=='began' || $status=='60pers' || $status=='completed' || $status=='failed') {
-                            $entity_data_class =  $this->GetEntityDataClass(MY_HL_BLOCK_ID);
+                            //$entity_data_class =  $this->GetEntityDataClass(MY_HL_BLOCK_ID);
+                            $entity_data_class = Utils::GetEntityDataClass(MY_HL_BLOCK_ID);
                             $addResult = $entity_data_class::add(array(
                                 'UF_ORDER'         => $order,
                                 'UF_STATUS'         => $status,
@@ -64,7 +66,7 @@ class Getcourseimp
         $this->showResponse();
     }
 
-    private function GetEntityDataClass($HlBlockId)
+    /*private function GetEntityDataClass($HlBlockId)
     {
         if (empty($HlBlockId) || $HlBlockId < 1)
         {
@@ -74,7 +76,7 @@ class Getcourseimp
         $entity = HLBT::compileEntity($hlblock);
         $entity_data_class = $entity->getDataClass();
         return $entity_data_class;
-    }
+    }*/
 
     private function showResponse()
     {
