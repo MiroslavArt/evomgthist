@@ -201,6 +201,7 @@ class Getcourse
             $res = \CCrmDeal::GetListEx(Array(), $arFilter, false, false, $arSelect);
             $arDeal = $res->fetch();
             if($arDeal) {
+                $arParams = [];
                 if($el['UF_STATUS']=='began' && $arDeal['STAGE_ID']!='C54:4') {
                     $arParams["STAGE_ID"]='C54:4';
                 } elseif($el['UF_STATUS']=='60pers' && $arDeal['STAGE_ID']!='C54:6') {
@@ -210,11 +211,14 @@ class Getcourse
                 } elseif($el['UF_STATUS']=='failed' && $arDeal['STAGE_ID']!='C54:5') {
                     $arParams["STAGE_ID"]='C54:5';
                 }
-                $res = $deal->Update($arDeal['ID'],$arParams);
+                if($arParams) {
+                    $res = $deal->Update($arDeal['ID'],$arParams);
+                }
+                $result = $entity_data_class::update($el['ID'], array(
+                    'UF_PROCESSED'       => '1'
+                ));
             }
-            $result = $entity_data_class::update($el['ID'], array(
-                'UF_PROCESSED'       => '1'
-            ));
+
         }
         return '\iTrack\Custom\Agents\Getcourse::checkupdatestudy();';
     }
