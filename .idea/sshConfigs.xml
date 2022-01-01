@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" connectionConfig="{&quot;serverAliveInterval&quot;:300}" host="evomgt.softmonster.ru" id="3c2ba8ec-e7c3-4afe-ad2b-a7aa5f38ebfc" port="22" customName="Evolution" nameFormat="CUSTOM" username="evomgt">
+        <option name="customName" value="Evolution" />
+      </sshConfig>
+    </configs>
+  </component>
+</project>
